@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI智能消防安全巡检考核系统</title>
+<style>
+  :root {
+    --primary: #e74c3c; --primary-dark: #c0392b; --primary-light: #fadbd8;
+    --secondary: #2c3e50; --accent: #f39c12;
+    --success: #27ae60; --success-light: #d5f5e3;
+    --danger: #e74c3c; --danger-light: #fadbd8;
+    --warning: #f39c12; --warning-light: #fef9e7;
+    --info: #3498db; --info-light: #d6eaf8;
+    --bg: #f5f6fa; --card: #ffffff; --border: #e0e0e0;
+    --text: #2c3e50; --text-muted: #7f8c8d;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --radius: 12px; --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .app-container { display: flex; min-height: 100vh; }
+  .sidebar { width: 240px; min-width: 240px; background: var(--secondary); color: #fff; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; box-shadow: 3px 0 12px rgba(0,0,0,0.15); }
+  .sidebar-logo { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .sidebar-logo .logo-icon { width: 44px; height: 44px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 10px; }
+  .sidebar-logo h2 { font-size: 14px; font-weight: 700; line-height: 1.4; }
+  .sidebar-logo p { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 3px; }
+  .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+  .nav-section-title { font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; padding: 12px 20px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; cursor: pointer; transition: all 0.2s; font-size: 13.5px; border-left: 3px solid transparent; color: rgba(255,255,255,0.75); }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .nav-item.active { background: rgba(231,76,60,0.2); border-left-color: var(--primary); color: #fff; }
+  .nav-item .nav-icon { font-size: 17px; width: 22px; text-align: center; }
+  .sidebar-footer { padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.6; }
+  .main-content { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .top-bar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 90; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+  .top-bar h1 { font-size: 17px; font-weight: 700; }
+  .top-bar .badge { background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .page-content { padding: 28px; flex: 1; }
+  .page-section { display: none; }
+  .page-section.active { display: block; }
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px; }
+  .card-title { font-size: 15px; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+  .card-title .icon { font-size: 18px; }
+  .form-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+  .form-grid.cols3 { grid-template-columns: repeat(3,1fr); }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+  input[type=text],input[type=number],select,textarea { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.2s,box-shadow 0.2s; background: #fff; width: 100%; }
+  input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(231,76,60,0.1); }
+  textarea { resize: vertical; min-height: 70px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; font-family: inherit; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 4px 12px rgba(231,76,60,0.35); }
+  .btn-secondary { background: #ecf0f1; color: var(--text); }
+  .btn-secondary:hover { background: #dfe6e9; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-success:hover { background: #229954; }
+  .btn-warning { background: var(--warning); color: #fff; }
+  .btn-info { background: var(--info); color: #fff; }
+  .btn-danger { background: #e74c3c; color: #fff; }
+  .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+  .btn-outline:hover { background: var(--primary-light); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-lg { padding: 14px 28px; font-size: 16px; }
+  .btn-full { width: 100%; justify-content: center; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .tag-success { background: var(--success-light); color: var(--success); }
+  .tag-danger { background: var(--danger-light); color: var(--danger); }
+  .tag-warning { background: var(--warning-light); color: var(--warning); }
+  .tag-info { background: var(--info-light); color: var(--info); }
+  .tag-gray { background: #f0f0f0; color: #666; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead th { background: #f8f9fa; color: var(--text-muted); font-weight: 600; padding: 10px 14px; text-align: left; border-bottom: 2px solid var(--border); white-space: nowrap; }
+  tbody td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  tbody tr:hover { background: #fafafa; }
+  tbody tr:last-child td { border-bottom: none; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 20px; }
+  .stat-card { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px; }
+  .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+  .stat-icon.red { background: var(--primary-light); }
+  .stat-icon.green { background: var(--success-light); }
+  .stat-icon.blue { background: var(--info-light); }
+  .stat-icon.orange { background: var(--warning-light); }
+  .stat-value { font-size: 26px; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .progress-bar-wrap { background: #ecf0f1; border-radius: 20px; overflow: hidden; height: 10px; }
+  .progress-bar { height: 100%; border-radius: 20px; transition: width 0.5s; }
+  .progress-bar.red { background: var(--primary); }
+  .progress-bar.green { background: var(--success); }
+  .progress-bar.blue { background: var(--info); }
+  .progress-bar.orange { background: var(--warning); }
+  .step-indicator { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 32px; }
+  .step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; position: relative; }
+  .step::before { content: ''; position: absolute; top: 18px; left: calc(50% + 22px); width: calc(100% - 44px); height: 2px; background: var(--border); }
+  .step:last-child::before { display: none; }
+  .step.done::before { background: var(--success); }
+  .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; background: #ecf0f1; color: var(--text-muted); border: 2px solid var(--border); transition: all 0.3s; z-index: 1; }
+  .step.active .step-circle { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(231,76,60,0.15); }
+  .step.done .step-circle { background: var(--success); color: #fff; border-color: var(--success); }
+  .step-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  .step.active .step-label { color: var(--primary); font-weight: 700; }
+  .step.done .step-label { color: var(--success); }
+  .voice-btn-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 24px 0; }
+  .voice-btn { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg,var(--primary),var(--primary-dark)); border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 36px; color: #fff; box-shadow: 0 4px 20px rgba(231,76,60,0.35); transition: all 0.2s; }
+  .voice-btn:hover { transform: scale(1.05); }
+  .voice-btn.recording { animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.5); } 50% { box-shadow: 0 0 0 18px rgba(231,76,60,0); } }
+  .voice-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .voice-status { font-size: 12px; color: var(--primary); min-height: 20px; font-weight: 600; text-align: center; }
+  .question-box { background: linear-gradient(135deg,#fff5f5,#fff); border: 2px solid var(--primary-light); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+  .question-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: flex; gap: 12px; }
+  .question-text { font-size: 16px; font-weight: 700; line-height: 1.6; color: var(--text); }
+  .question-hint { font-size: 12px; color: var(--text-muted); margin-top: 10px; font-style: italic; }
+  .score-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 16px; font-weight: 800; }
+  .score-circle.pass { background: linear-gradient(135deg,#27ae60,#2ecc71); color: #fff; box-shadow: 0 4px 20px rgba(39,174,96,0.35); }
+  .score-circle.fail { background: linear-gradient(135deg,#e74c3c,#c0392b); color: #fff; box-shadow: 0 4px 20px rgba(231,76,60,0.35); }
+  .score-circle .score-num { font-size: 36px; line-height: 1; }
+  .score-circle .score-text { font-size: 13px; margin-top: 2px; }
+  .grading-item { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px; }
+  .grading-item.hit { border-color: #a9dfbf; background: #f9fff9; }
+  .grading-item.miss { border-color: #f5b7b1; background: #fff9f9; }
+  .grading-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .grading-item-title { font-size: 14px; font-weight: 700; }
+  .grading-detail { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+  .grading-evidence { font-size: 12px; color: var(--info); margin-top: 4px; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: var(--radius); padding: 28px; max-width: 560px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; animation: slideUp 0.25s ease; }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
+  .modal-close { cursor: pointer; font-size: 20px; color: var(--text-muted); background: none; border: none; line-height: 1; }
+  .modal-close:hover { color: var(--primary); }
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+  .toast { background: var(--secondary); color: #fff; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); animation: toastIn 0.3s ease; max-width: 300px; display: flex; align-items: center; gap: 8px; }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--primary); }
+  .toast.warning { background: var(--warning); }
+  @keyframes toastIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .timer-display { font-size: 28px; font-weight: 800; color: var(--primary); text-align: center; font-variant-numeric: tabular-nums; letter-spacing: 2px; }
+  .timer-display.warning { color: var(--warning); animation: blink 0.8s ease infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .chart-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .chart-bar-label { width: 140px; font-size: 13px; flex-shrink: 0; text-align: right; color: var(--text-muted); }
+  .chart-bar-wrap { flex: 1; background: #ecf0f1; border-radius: 20px; overflow: hidden; height: 22px; }
+  .chart-bar { height: 100%; border-radius: 20px; display: flex; align-items: center; padding-left: 10px; font-size: 11px; color: #fff; font-weight: 700; transition: width 0.7s cubic-bezier(0.25,0.46,0.45,0.94); min-width: 2px; }
+  .chart-bar-value { width: 40px; text-align: right; font-size: 12px; font-weight: 700; }
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .info-banner { background: linear-gradient(135deg,var(--info-light),#fff); border: 1.5px solid #a9cce3; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: #1a5276; display: flex; gap: 8px; align-items: flex-start; margin-bottom: 16px; }
+  .scoring-point { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 6px; background: #f8f9fa; }
+  .question-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .q-nav-btn { width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; cursor: pointer; border: 2px solid var(--border); background: #fff; color: var(--text); transition: all 0.15s; }
+  .q-nav-btn.current { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .q-nav-btn.answered { border-color: var(--success); background: var(--success-light); color: var(--success); }
+  .q-nav-btn.skipped { border-color: var(--warning); background: var(--warning-light); color: var(--warning); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+  @media(max-width:900px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
+  @media(max-width:640px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; } .stats-grid { grid-template-columns: 1fr 1fr; } .form-grid { grid-template-columns: 1fr; } .page-content { padding: 16px; } }
+</style>
+</head>
+<body>
+<div class="app-container">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🔥</div>
+      <h2>AI消防安全考核系统</h2>
+      <p>中国移动乌鲁木齐分公司</p>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">考核流程</div>
+      <div class="nav-item active" onclick="switchPage('home')" id="nav-home"><span class="nav-icon">🏠</span> 系统首页</div>
+      <div class="nav-item" onclick="switchPage('exam')" id="nav-exam"><span class="nav-icon">📝</span> 开始考核</div>
+      <div class="nav-section-title" style="margin-top:8px;">管理后台</div>
+      <div class="nav-item" onclick="switchPage('qbank')" id="nav-qbank"><span class="nav-icon">📚</span> 题库管理</div>
+      <div class="nav-item" onclick="switchPage('ledger')" id="nav-ledger"><span class="nav-icon">📊</span> 考核台账</div>
+      <div class="nav-item" onclick="switchPage('analysis')" id="nav-analysis"><span class="nav-icon">📈</span> 薄弱分析</div>
+    </div>
+    <div class="sidebar-footer">v1.0.0 Demo · 基于Dify低代码平台<br>提取练习效应 · AI语义阅卷</div>
+  </nav>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <h1 id="page-title">系统首页</h1>
+      <span class="badge" id="page-badge">AI智能考核 · Demo版</span>
+    </div>
+    <div class="page-content">
+
+      <!-- HOME -->
+      <div class="page-section active" id="page-home">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon red">🔥</div><div><div class="stat-value" id="stat-total">0</div><div class="stat-label">累计考核人次</div></div></div>
+          <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value" id="stat-pass-rate">—</div><div class="stat-label">综合通过率</div></div></div>
+          <div class="stat-card"><div class="stat-icon blue">📚</div><div><div class="stat-value" id="stat-qcount">0</div><div class="stat-label">题库总题数</div></div></div>
+          <div class="stat-card"><div class="stat-icon orange">⏱️</div><div><div class="stat-value" id="stat-avg-score">—</div><div class="stat-label">平均得分率</div></div></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title"><span class="icon">🎯</span>系统简介</div>
+            <div class="info-banner"><span>💡</span><span>本系统基于<strong>认知科学提取练习效应</strong>理论，采用语音口述答题替代传统选择题，通过AI语义阅卷实现智能考核。</span></div>
+            <div style="font-size:13.5px;line-height:1.9;color:var(--text-muted);">
+              <p>✅ <strong>打破传统</strong>：颠覆选择题被动笔试，落地语音口述主动考核</p>
+              <p>✅ <strong>AI阅卷</strong>：语义宽松判分，兼容口语化表达</p>
+              <p>✅ <strong>全流程自动化</strong>：无需人工组卷、阅卷、统计、制表</p>
+              <p>✅ <strong>数据可视化</strong>：自动生成台账、薄弱点分析报告</p>
+            </div>
+            <div style="margin-top:16px;"><button class="btn btn-primary" onclick="switchPage('exam')">🚀 立即开始考核</button></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="icon">🧠</span>科学依据</div>
+            <div style="font-size:13px;line-height:1.8;margin-bottom:14px;color:var(--text-muted);">基于Roediger & Karpicke（2006）权威实验，7日后知识留存率对比：</div>
+            <div class="chart-bar-row"><div class="chart-bar-label">传统选择题</div><div class="chart-bar-wrap"><div class="chart-bar red" style="width:35.8%">35.8%</div></div><div class="chart-bar-value" style="color:var(--primary)">35.8%</div></div>
+            <div class="chart-bar-row"><div class="chart-bar-label">语音口述考核</div><div class="chart-bar-wrap"><div class="chart-bar green" style="width:79.5%">79.5%</div></div><div class="chart-bar-value" style="color:var(--success)">79.5%</div></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">📊 7日后知识留存率（本系统实测数据）</div>
+            <hr class="divider">
+            <div style="font-size:13px;color:var(--text-muted);"><span class="tag tag-danger" style="margin-right:6px;">虚假合格率 19.2% → 0%</span><span class="tag tag-success">人工工时缩减 87.5%</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📋</span>考核流程说明</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;">
+            <div style="padding:16px;background:#fff5f5;border-radius:10px;border:1.5px solid var(--primary-light);"><div style="font-size:28px;margin-bottom:8px;">📋</div><div style="font-weight:700;font-size:14px;margin-bottom:4px;">①登记信息</div><div style="font-size:12px;color:var(--text-muted);">填写姓名、工号、部门等基础信息</div></div>
+            <div style="padding:16px;background:#f0fff4;border-radius:10px;border:1.5px solid #a9dfbf;"><div style="font-size:28px;margin-bottom:8px;">🎙️</div><div style="font-weight:700;font-size:14px;margin-bottom:4px;">②语音答题</div><div style="font-size:12px;color:var(--text-muted);">点击麦克风，口述答案或手动输入</div></div>
+            <div style="padding:16px;background:#eaf4fd;border-radius:10px;border:1.5px solid #a9cce3;"><div style="font-size:28px;margin-bottom:8px;">🤖</div><div style="font-weight:700;font-size:14px;margin-bottom:4px;">③AI阅卷</div><div style="font-size:12px;color:var(--text-muted);">语义匹配，宽松判分，输出评分依据</div></div>
+            <div style="padding:16px;background:#fef9e7;border-radius:10px;border:1.5px solid #f9e79f;"><div style="font-size:28px;margin-bottom:8px;">📊</div><div style="font-weight:700;font-size:14px;margin-bottom:4px;">④查看结果</div><div style="font-size:12px;color:var(--text-muted);">详细评分报告，自动归档台账</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXAM -->
+      <div class="page-section" id="page-exam">
+        <div id="exam-step-register">
+          <div class="card">
+            <div class="card-title"><span class="icon">📋</span>考核信息登记</div>
+            <div class="step-indicator">
+              <div class="step active" id="step1"><div class="step-circle">1</div><div class="step-label">信息登记</div></div>
+              <div class="step" id="step2"><div class="step-circle">2</div><div class="step-label">语音答题</div></div>
+              <div class="step" id="step3"><div class="step-circle">3</div><div class="step-label">AI阅卷</div></div>
+              <div class="step" id="step4"><div class="step-circle">4</div><div class="step-label">查看结果</div></div>
+            </div>
+            <div class="info-banner"><span>ℹ️</span><span>本次考核采用<strong>语音口述</strong>答题模式，无需机械背诵标准答案，可使用自然口语表达消防知识点。</span></div>
+            <div class="form-grid">
+              <div class="form-group"><label>姓名 *</label><input type="text" id="reg-name" placeholder="请输入真实姓名"></div>
+              <div class="form-group"><label>工号 *</label><input type="text" id="reg-id" placeholder="请输入工号"></div>
+              <div class="form-group"><label>所属部门 *</label>
+                <select id="reg-dept">
+                  <option value="">请选择部门</option>
+                  <option>综合部</option><option>开发区综合部</option><option>市场部</option>
+                  <option>政企部</option><option>网络部</option><option>一线网格</option><option>区县集团组</option>
+                </select>
+              </div>
+              <div class="form-group"><label>岗位类型 *</label>
+                <select id="reg-job">
+                  <option value="">请选择岗位</option>
+                  <option>消防巡检</option><option>行政管理</option><option>运维支撑</option>
+                  <option>网络工程</option><option>市场营销</option><option>其他</option>
+                </select>
+              </div>
+              <div class="form-group"><label>考核题数</label>
+                <select id="reg-qcount">
+                  <option value="3">3题（快速考核）</option>
+                  <option value="5" selected>5题（标准考核）</option>
+                  <option value="8">8题（强化考核）</option>
+                </select>
+              </div>
+              <div class="form-group"><label>每题答题时限（秒）</label>
+                <select id="reg-timelimit">
+                  <option value="60">60秒</option>
+                  <option value="90" selected>90秒</option>
+                  <option value="120">120秒</option>
+                  <option value="0">不限时</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:20px;"><button class="btn btn-primary btn-lg" onclick="startExam()">确认信息，进入考核 →</button></div>
+          </div>
+        </div>
+
+        <div id="exam-step-answer" style="display:none;">
+          <div style="display:grid;grid-template-columns:1fr 260px;gap:20px;">
+            <div>
+              <div class="card" style="padding:18px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                  <div style="font-size:14px;font-weight:700;">第 <span id="cur-q-num">1</span> 题 / 共 <span id="total-q-num">5</span> 题</div>
+                  <div class="timer-display" id="exam-timer">01:30</div>
+                </div>
+                <div class="progress-bar-wrap" style="margin-bottom:18px;"><div class="progress-bar red" id="exam-progress" style="width:20%"></div></div>
+                <div class="question-nav" id="q-nav"></div>
+                <div class="question-box">
+                  <div class="question-meta"><span id="q-category-tag"></span><span>难度：<strong id="q-difficulty">中等</strong></span></div>
+                  <div class="question-text" id="q-text">加载中...</div>
+                  <div class="question-hint" id="q-hint"></div>
+                </div>
+                <div class="voice-btn-wrap">
+                  <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">🎙️</button>
+                  <div class="voice-label">点击麦克风开始/停止录音</div>
+                  <div class="voice-status" id="voice-status"></div>
+                </div>
+                <div style="margin-bottom:14px;">
+                  <label style="margin-bottom:6px;display:block;">📝 已识别/输入内容（可直接编辑）：</label>
+                  <textarea id="answer-text" rows="3" placeholder="语音识别内容将显示在此处，也可直接手动输入答案..."></textarea>
+                </div>
+                <div class="btn-group">
+                  <button class="btn btn-secondary" onclick="skipQuestion()">跳过此题 →</button>
+                  <button class="btn btn-success" onclick="confirmAnswer()">✅ 确认答案，下一题</button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="card" style="padding:16px;">
+                <div class="card-title" style="font-size:13px;"><span>👤</span>考生信息</div>
+                <div style="font-size:13px;line-height:2;color:var(--text-muted);">
+                  <div>姓名：<strong id="info-name" style="color:var(--text)">—</strong></div>
+                  <div>工号：<strong id="info-id" style="color:var(--text)">—</strong></div>
+                  <div>部门：<strong id="info-dept" style="color:var(--text)">—</strong></div>
+                  <div>岗位：<strong id="info-job" style="color:var(--text)">—</strong></div>
+                </div>
+              </div>
+              <div class="card" style="padding:16px;margin-top:16px;">
+                <div class="card-title" style="font-size:13px;"><span>💡</span>答题提示</div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:1.8;">
+                  <p>• 请<strong>用自然语言</strong>口述或输入答案</p>
+                  <p>• 无需背诵标准答案，意思正确即可</p>
+                  <p>• AI会识别口语化表达</p>
+                  <p>• 如"总闸拉下来"等同于"切断电源"</p>
+                </div>
+              </div>
+              <div class="card" style="padding:16px;margin-top:16px;">
+                <div class="card-title" style="font-size:13px;"><span>📋</span>作答进度</div>
+                <div id="answer-progress-list" style="font-size:12px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="exam-step-grading" style="display:none;">
+          <div class="card" style="text-align:center;padding:40px;">
+            <div style="font-size:60px;margin-bottom:16px;animation:pulse 1s ease infinite;">🤖</div>
+            <div style="font-size:18px;font-weight:700;margin-bottom:8px;">AI正在智能阅卷中...</div>
+            <div style="font-size:14px;color:var(--text-muted);margin-bottom:20px;">正在进行语义解析与评分点匹配</div>
+            <div class="progress-bar-wrap" style="max-width:400px;margin:0 auto;height:12px;"><div class="progress-bar blue" id="grading-bar" style="width:0%;transition:width 0.5s;"></div></div>
+            <div style="font-size:13px;color:var(--info);margin-top:12px;" id="grading-status">初始化语义引擎...</div>
+          </div>
+        </div>
+
+        <div id="exam-step-result" style="display:none;">
+          <div class="card">
+            <div class="card-title"><span class="icon">🏆</span>考核结果</div>
+            <div style="text-align:center;margin-bottom:24px;">
+              <div class="score-circle" id="result-circle"><div class="score-num" id="result-score">—</div><div class="score-text" id="result-status">—</div></div>
+              <div style="font-size:14px;color:var(--text-muted);margin-bottom:8px;" id="result-summary"></div>
+              <div id="result-tags" style="margin-bottom:16px;"></div>
+            </div>
+            <hr class="divider">
+            <div class="card-title" style="margin-top:0;"><span>📋</span>逐题阅卷详情</div>
+            <div id="grading-details"></div>
+            <div style="margin-top:20px;" class="btn-group">
+              <button class="btn btn-primary" onclick="retakeExam()">🔄 重新考核</button>
+              <button class="btn btn-secondary" onclick="switchPage('ledger')">📊 查看台账</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUESTION BANK -->
+      <div class="page-section" id="page-qbank">
+        <div class="card">
+          <div class="card-title"><span class="icon">📚</span>题库管理</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="showAddQuestionModal()">➕ 新增题目</button>
+              <button class="btn btn-info" onclick="importSampleQuestions()">📥 导入示例题库</button>
+              <button class="btn btn-secondary" onclick="exportQuestions()">📤 导出题库</button>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <select id="qbank-filter" onchange="renderQBank()" style="width:120px;padding:8px 10px;font-size:13px;">
+                <option value="">全部分类</option>
+                <option>灭火器</option><option>火灾报警</option><option>疏散逃生</option><option>日常巡检</option><option>应急处置</option>
+              </select>
+              <input type="text" id="qbank-search" placeholder="搜索题目..." oninput="renderQBank()" style="width:180px;padding:8px 12px;font-size:13px;">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th style="width:40px;">#</th><th style="width:80px;">分类</th><th>题目内容</th><th>核心评分点</th><th style="width:70px;">难度</th><th style="width:100px;">操作</th></tr></thead>
+              <tbody id="qbank-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">题库为空，请导入示例题库或新增题目</td></tr></tbody>
+            </table>
+          </div>
+          <div style="margin-top:12px;font-size:12px;color:var(--text-muted);" id="qbank-count">共 0 道题目</div>
+        </div>
+      </div>
+
+      <!-- LEDGER -->
+      <div class="page-section" id="page-ledger">
+        <div class="card">
+          <div class="card-title"><span class="icon">📊</span>考核台账</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+            <div class="btn-group">
+              <button class="btn btn-success" onclick="exportLedger()">📥 导出CSV</button>
+              <button class="btn btn-danger btn-sm" onclick="clearLedger()">🗑️ 清空台账</button>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <select id="ledger-filter" onchange="renderLedger()" style="width:110px;padding:8px 10px;font-size:13px;">
+                <option value="">全部结果</option><option value="pass">通过</option><option value="fail">未通过</option>
+              </select>
+              <input type="text" id="ledger-search" placeholder="搜索姓名/工号..." oninput="renderLedger()" style="width:160px;padding:8px 12px;font-size:13px;">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>姓名</th><th>工号</th><th>部门</th><th>岗位</th><th>考核时间</th><th>题数</th><th>得分率</th><th>结果</th><th>操作</th></tr></thead>
+              <tbody id="ledger-tbody"><tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-muted);">暂无考核记录</td></tr></tbody>
+            </table>
+          </div>
+          <div style="margin-top:12px;font-size:12px;color:var(--text-muted);" id="ledger-count">共 0 条记录</div>
+        </div>
+      </div>
+
+      <!-- ANALYSIS -->
+      <div class="page-section" id="page-analysis">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon red">📊</div><div><div class="stat-value" id="an-total">0</div><div class="stat-label">总考核次数</div></div></div>
+          <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value" id="an-pass-rate">—</div><div class="stat-label">通过率</div></div></div>
+          <div class="stat-card"><div class="stat-icon blue">🎯</div><div><div class="stat-value" id="an-avg">—</div><div class="stat-label">平均得分率</div></div></div>
+          <div class="stat-card"><div class="stat-icon orange">⚠️</div><div><div class="stat-value" id="an-weak">—</div><div class="stat-label">最薄弱知识点</div></div></div>
+        </div>
+        <div class="two-col">
+          <div class="card"><div class="card-title"><span class="icon">⚠️</span>知识点薄弱排行</div><div id="weak-chart"></div></div>
+          <div class="card"><div class="card-title"><span class="icon">📈</span>分类通过率分析</div><div id="category-chart"></div></div>
+        </div>
+        <div class="card"><div class="card-title"><span class="icon">📉</span>近期考核得分趋势（最近10次）</div><div id="score-trend"></div></div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🏢</span>部门考核汇总</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>部门</th><th>考核人次</th><th>通过人次</th><th>通过率</th><th>平均得分</th></tr></thead>
+              <tbody id="dept-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Question -->
+<div class="modal-overlay" id="modal-question">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-q-title">新增考核题目</span><button class="modal-close" onclick="closeModal('modal-question')">✕</button></div>
+    <div class="form-group" style="margin-bottom:14px;"><label>题目内容 *</label><textarea id="mq-text" rows="3" placeholder="请输入题目内容，例如：请简述灭火器的日常检查要点"></textarea></div>
+    <div class="form-grid" style="margin-bottom:14px;">
+      <div class="form-group"><label>分类</label><select id="mq-category"><option>灭火器</option><option>火灾报警</option><option>疏散逃生</option><option>日常巡检</option><option>应急处置</option></select></div>
+      <div class="form-group"><label>难度</label><select id="mq-difficulty"><option>简单</option><option selected>中等</option><option>困难</option></select></div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px;"><label>核心评分点（每行一个，关键词用分号;分隔，AI会语义匹配）</label><textarea id="mq-points" rows="4" placeholder="例如：&#10;压力表;气压表;指针;绿区&#10;瓶体;罐子;锈蚀;损坏&#10;喷管;管子;堵塞&#10;保险销;铅封;插销"></textarea></div>
+    <div class="form-group" style="margin-bottom:14px;"><label>答题提示（可选）</label><input type="text" id="mq-hint" placeholder="例如：请从外观、压力、配件等方面回答"></div>
+    <div class="form-group" style="margin-bottom:20px;"><label>参考答案（展示用，不作评分依据）</label><textarea id="mq-answer" rows="3" placeholder="填写标准参考答案..."></textarea></div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="saveQuestion()">💾 保存题目</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-question')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Ledger Detail -->
+<div class="modal-overlay" id="modal-ledger-detail">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-title"><span>考核详情</span><button class="modal-close" onclick="closeModal('modal-ledger-detail')">✕</button></div>
+    <div id="ledger-detail-content"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ===================== DATA STORE =====================
+var store = { questions: [], records: [], editingQId: null };
+var exam = { user: {}, questions: [], answers: [], currentQ: 0, timerInterval: null, timeLeft: 90, recognition: null, isRecording: false, timeLimit: 90 };
+
+function init() {
+  var saved = localStorage.getItem('fire_safety_store');
+  if (saved) { try { var s = JSON.parse(saved); store.questions = s.questions||[]; store.records = s.records||[]; } catch(e){} }
+  updateHomeStats();
+}
+
+function saveStore() {
+  localStorage.setItem('fire_safety_store', JSON.stringify({questions:store.questions, records:store.records}));
+}
+
+// ===================== NAVIGATION =====================
+var pageTitles = {
+  home: ['系统首页','AI智能考核 · Demo版'],
+  exam: ['开始考核','消防安全知识考核'],
+  qbank: ['题库管理','题目管理与维护'],
+  ledger: ['考核台账','历史记录与数据归档'],
+  analysis: ['薄弱分析','知识点统计与趋势分析']
+};
+
+function switchPage(page) {
+  document.querySelectorAll('.page-section').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('nav-'+page).classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[page][0];
+  document.getElementById('page-badge').textContent = pageTitles[page][1];
+  if (page==='qbank') renderQBank();
+  if (page==='ledger') renderLedger();
+  if (page==='analysis') renderAnalysis();
+  if (page==='home') updateHomeStats();
+}
+
+// ===================== HOME =====================
+function updateHomeStats() {
+  var records = store.records;
+  document.getElementById('stat-total').textContent = records.length;
+  document.getElementById('stat-qcount').textContent = store.questions.length;
+  if (records.length > 0) {
+    var passCount = records.filter(function(r){ return r.passed; }).length;
+    document.getElementById('stat-pass-rate').textContent = Math.round(passCount/records.length*100)+'%';
+    var avgScore = Math.round(records.reduce(function(a,r){ return a+r.scoreRate; },0)/records.length);
+    document.getElementById('stat-avg-score').textContent = avgScore+'%';
+  } else {
+    document.getElementById('stat-pass-rate').textContent = '—';
+    document.getElementById('stat-avg-score').textContent = '—';
+  }
+}
+
+// ===================== EXAM =====================
+function startExam() {
+  var name = document.getElementById('reg-name').value.trim();
+  var id = document.getElementById('reg-id').value.trim();
+  var dept = document.getElementById('reg-dept').value;
+  var job = document.getElementById('reg-job').value;
+  if (!name||!id||!dept||!job) { showToast('请填写完整的考生信息','error'); return; }
+  if (store.questions.length === 0) { showToast('题库为空，请先导入示例题库','error'); return; }
+  var qcount = parseInt(document.getElementById('reg-qcount').value);
+  var timelimit = parseInt(document.getElementById('reg-timelimit').value);
+  exam.user = { name:name, id:id, dept:dept, job:job, startTime: new Date().toLocaleString('zh-CN') };
+  var shuffled = store.questions.slice().sort(function(){ return Math.random()-0.5; });
+  exam.questions = shuffled.slice(0, Math.min(qcount, shuffled.length));
+  exam.answers = new Array(exam.questions.length).fill(null);
+  exam.currentQ = 0;
+  exam.timeLimit = timelimit;
+  exam.timeLeft = timelimit || 99999;
+  setExamStep(2);
+  renderQuestionNav();
+  loadQuestion(0);
+  startTimer();
+  updateInfoPanel();
+}
+
+function setExamStep(step) {
+  document.getElementById('exam-step-register').style.display = step===1?'':'none';
+  document.getElementById('exam-step-answer').style.display = step===2?'':'none';
+  document.getElementById('exam-step-grading').style.display = step===3?'':'none';
+  document.getElementById('exam-step-result').style.display = step===4?'':'none';
+  for (var i=1;i<=4;i++) {
+    var el = document.getElementById('step'+i);
+    el.className = 'step';
+    if (i<step) el.classList.add('done');
+    else if (i===step) el.classList.add('active');
+    el.querySelector('.step-circle').textContent = i<step?'✓':i;
+  }
+}
+
+function updateInfoPanel() {
+  document.getElementById('info-name').textContent = exam.user.name;
+  document.getElementById('info-id').textContent = exam.user.id;
+  document.getElementById('info-dept').textContent = exam.user.dept;
+  document.getElementById('info-job').textContent = exam.user.job;
+}
+
+function loadQuestion(idx) {
+  exam.currentQ = idx;
+  var q = exam.questions[idx];
+  document.getElementById('cur-q-num').textContent = idx+1;
+  document.getElementById('total-q-num').textContent = exam.questions.length;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-hint').textContent = q.hint ? '💡 提示：'+q.hint : '';
+  document.getElementById('q-difficulty').textContent = q.difficulty||'中等';
+  document.getElementById('q-category-tag').innerHTML = '<span class="tag tag-info">'+escH(q.category)+'</span>';
+  document.getElementById('answer-text').value = exam.answers[idx]||'';
+  var pct = Math.round((idx+1)/exam.questions.length*100);
+  document.getElementById('exam-progress').style.width = pct+'%';
+  renderQuestionNav();
+  renderAnswerProgress();
+  if (exam.timeLimit>0) { exam.timeLeft=exam.timeLimit; updateTimerDisplay(); }
+  document.getElementById('voice-status').textContent = '';
+  document.getElementById('voice-btn').className = 'voice-btn';
+  if (exam.isRecording) stopVoice();
+}
+
+function renderQuestionNav() {
+  var nav = document.getElementById('q-nav');
+  nav.innerHTML = exam.questions.map(function(q,i){
+    var cls = 'q-nav-btn';
+    if (i===exam.currentQ) cls+=' current';
+    else if (exam.answers[i]==='【已跳过】') cls+=' skipped';
+    else if (exam.answers[i]!==null) cls+=' answered';
+    return '<div class="'+cls+'" onclick="loadQuestion('+i+')">'+(i+1)+'</div>';
+  }).join('');
+}
+
+function renderAnswerProgress() {
+  var list = document.getElementById('answer-progress-list');
+  list.innerHTML = exam.questions.map(function(q,i){
+    var ans = exam.answers[i];
+    var status = ans===null?'⬜ 未答':(ans==='【已跳过】'?'⚡ 已跳过':'✅ 已答');
+    var color = ans===null?'#bdc3c7':(ans==='【已跳过】'?'#f39c12':'#27ae60');
+    return '<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">'+
+      '<span style="font-size:10px;width:18px;height:18px;border-radius:50%;background:'+color+';color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(i+1)+'</span>'+
+      '<span style="font-size:11px;color:var(--text-muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escH(q.text.substring(0,20))+'...</span>'+
+      '<span style="font-size:10px;color:'+color+';">'+status+'</span></div>';
+  }).join('');
+}
+
+function startTimer() {
+  clearInterval(exam.timerInterval);
+  if (!exam.timeLimit||exam.timeLimit<=0) { document.getElementById('exam-timer').textContent='∞'; return; }
+  exam.timerInterval = setInterval(function(){
+    exam.timeLeft--;
+    updateTimerDisplay();
+    if (exam.timeLeft<=10) document.getElementById('exam-timer').className='timer-display warning';
+    else document.getElementById('exam-timer').className='timer-display';
+    if (exam.timeLeft<=0) {
+      clearInterval(exam.timerInterval);
+      showToast('当前题目时间到，已自动记录','warning');
+      var cur = document.getElementById('answer-text').value.trim();
+      exam.answers[exam.currentQ] = cur||'【超时未作答】';
+      moveToNext();
+    }
+  },1000);
+}
+
+function updateTimerDisplay() {
+  var m=Math.floor(exam.timeLeft/60).toString().padStart(2,'0');
+  var s=(exam.timeLeft%60).toString().padStart(2,'0');
+  document.getElementById('exam-timer').textContent=m+':'+s;
+}
+
+function skipQuestion() {
+  exam.answers[exam.currentQ]='【已跳过】';
+  renderQuestionNav(); moveToNext();
+}
+
+function confirmAnswer() {
+  var text=document.getElementById('answer-text').value.trim();
+  if (!text) { showToast('请先录入或输入答案','warning'); return; }
+  exam.answers[exam.currentQ]=text;
+  renderQuestionNav(); moveToNext();
+}
+
+function moveToNext() {
+  if (exam.currentQ<exam.questions.length-1) {
+    loadQuestion(exam.currentQ+1);
+    if (exam.timeLimit>0) startTimer();
+  } else {
+    var idx=exam.answers.findIndex(function(a){ return a===null; });
+    if (idx!==-1) { loadQuestion(idx); if(exam.timeLimit>0)startTimer(); return; }
+    submitExam();
+  }
+}
+
+function submitExam() {
+  clearInterval(exam.timerInterval);
+  if (exam.isRecording) stopVoice();
+  setExamStep(3);
+  simulateGrading();
+}
+
+// ===================== VOICE =====================
+function toggleVoice() { exam.isRecording?stopVoice():startVoice(); }
+
+function startVoice() {
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if (!SR) { showToast('当前浏览器不支持语音识别，请手动输入（建议Chrome）','warning'); return; }
+  exam.recognition=new SR();
+  exam.recognition.lang='zh-CN';
+  exam.recognition.continuous=true;
+  exam.recognition.interimResults=true;
+  var finalText=document.getElementById('answer-text').value;
+  exam.recognition.onresult=function(ev){
+    var interim='';
+    for(var i=ev.resultIndex;i<ev.results.length;i++){
+      if(ev.results[i].isFinal) finalText+=ev.results[i][0].transcript;
+      else interim+=ev.results[i][0].transcript;
+    }
+    document.getElementById('answer-text').value=finalText+interim;
+  };
+  exam.recognition.onerror=function(){ exam.isRecording=false; document.getElementById('voice-btn').className='voice-btn'; document.getElementById('voice-status').textContent='识别出错，请手动输入'; };
+  exam.recognition.onend=function(){ if(exam.isRecording) exam.recognition.start(); };
+  exam.recognition.start();
+  exam.isRecording=true;
+  document.getElementById('voice-btn').className='voice-btn recording';
+  document.getElementById('voice-status').textContent='🔴 录音中，点击停止...';
+}
+
+function stopVoice() {
+  if (exam.recognition) { exam.recognition.stop(); exam.recognition=null; }
+  exam.isRecording=false;
+  document.getElementById('voice-btn').className='voice-btn';
+  document.getElementById('voice-status').textContent='✅ 录音结束，已转写';
+}
+
+// ===================== AI GRADING =====================
+function simulateGrading() {
+  var steps=['初始化语义引擎...','加载消防知识库...','ASR文本预处理...','AI大模型语义解析中...','口语化表述映射标准术语...','宽松匹配评分点...','生成评分依据报告...','汇总最终考核结果...'];
+  var i=0;
+  var bar=document.getElementById('grading-bar');
+  var status=document.getElementById('grading-status');
+  var interval=setInterval(function(){
+    i++;
+    bar.style.width=Math.round(i/steps.length*100)+'%';
+    status.textContent=steps[Math.min(i,steps.length-1)];
+    if(i>=steps.length){
+      clearInterval(interval);
+      setTimeout(function(){ var results=gradeExam(); showResults(results); },400);
+    }
+  },350);
+}
+
+// Semantic grading engine
+var semanticMaps = [
+  {patterns:['断电','拉闸','总闸','切断电源','关电','断掉','关掉电','电闸','关闭电源'], canonical:'切断电源'},
+  {patterns:['气压','压力表','气压表','指针','绿区','绿色','正常范围','表针'], canonical:'压力表正常'},
+  {patterns:['瓶体','罐子','瓶身','外壳','没锈','无锈','完好','瓶外'], canonical:'瓶体完好'},
+  {patterns:['管子','皮管','喷嘴','喷管','没堵','通畅','软管'], canonical:'喷管完好'},
+  {patterns:['保险销','插销','锁销','铅封','销子','没拔','保险针'], canonical:'保险销完整'},
+  {patterns:['119','报警','拨打','消防队','消防电话','火警'], canonical:'拨打119'},
+  {patterns:['消控中心','控制室','消防控制','报告上级','通知管理','消防值班'], canonical:'向消控中心报告'},
+  {patterns:['湿布','湿毛巾','捂住口鼻','防烟','防毒','掩住口','捂口'], canonical:'捂住口鼻'},
+  {patterns:['低姿','弯腰','匍匐','爬行','俯身','蹲下','低身'], canonical:'低姿逃生'},
+  {patterns:['通道','安全出口','疏散通道','疏散门','疏散口','逃生出口'], canonical:'疏散通道畅通'},
+  {patterns:['月检','定期检查','每月','月度','定期'], canonical:'定期检查'},
+  {patterns:['灭火器','手提式','推车式','co2','二氧化碳','电火','干粉','泡沫','灭火瓶'], canonical:'灭火器'},
+  {patterns:['拔销','拔掉','拔出','取出销子','取下保险'], canonical:'拔出保险销'},
+  {patterns:['压把','按下','握住把','压下','用力压'], canonical:'压下压把'},
+  {patterns:['扫射','对准根部','从根部','左右扫','扫向','扫过'], canonical:'对准根部扫射'},
+  {patterns:['距离','靠近','站在侧方','适当距离','2米','3米','两三米'], canonical:'保持适当距离'},
+  {patterns:['立即清除','移走','清理堵塞','搬走','移开'], canonical:'立即清除堵塞'},
+  {patterns:['上报','报告','通知','汇报','告知'], canonical:'上报报告'},
+  {patterns:['记录','拍照','存档','留证','留档','照相'], canonical:'留存记录'},
+  {patterns:['整改','追责','追踪','跟进','处理结果'], canonical:'整改追踪'},
+  {patterns:['清洗','冲洗','清理泥沙','洗干净'], canonical:'清洗'},
+  {patterns:['晾干','烘干','干燥','避免潮湿','自然晾干'], canonical:'晾干'},
+  {patterns:['卷好','折叠','存放','归位','收纳'], canonical:'收纳存放'},
+  {patterns:['会报警','报警','通报火情','拨打119','发现火情报警'], canonical:'会报警'},
+  {patterns:['会灭火','使用灭火器','初期灭火','扑救初期'], canonical:'会灭火'},
+  {patterns:['会逃生','疏散','逃生','撤离','逃跑','引导撤离'], canonical:'会逃生疏散'},
+  {patterns:['电气','电器','电路','电子设备','精密仪器','计算机'], canonical:'适用电气火灾'},
+  {patterns:['不导电','绝缘','安全','避免触电','无残留'], canonical:'不导电无残留'},
+  {patterns:['位置','地点','着火位置','火灾地点','在哪里','告知地点'], canonical:'告知位置'},
+  {patterns:['情况','火势','燃烧情况','火情','多大','几层'], canonical:'说明火情'},
+  {patterns:['消火栓','水带','水枪','消防水'], canonical:'消火栓设备'},
+  {patterns:['应急灯','应急照明','疏散标识','指示灯','疏散指示'], canonical:'应急照明标识'},
+  {patterns:['破损','老化','渗漏','漏水','检查破损'], canonical:'检查破损'},
+];
+
+function semanticHit(answerLower, keywords) {
+  // Direct keyword match
+  for (var ki=0; ki<keywords.length; ki++) {
+    var kw = keywords[ki].trim().toLowerCase();
+    if (kw && answerLower.indexOf(kw.replace(/\s/g,''))!==-1) return {hit:true, evidence:'直接命中"'+kw+'"'};
+  }
+  // Semantic map match
+  for (var mi=0; mi<semanticMaps.length; mi++) {
+    var map = semanticMaps[mi];
+    // Check if any keyword relates to this map's canonical
+    var relevant = keywords.some(function(k){ return map.canonical.toLowerCase().indexOf(k.toLowerCase())!==-1 || map.patterns.some(function(p){ return p.indexOf(k.toLowerCase())!==-1; }); });
+    if (!relevant) continue;
+    for (var pi=0; pi<map.patterns.length; pi++) {
+      var pat = map.patterns[pi].replace(/\s/g,'');
+      if (answerLower.indexOf(pat)!==-1) return {hit:true, evidence:'"'+map.patterns[pi]+'" → 语义等价"'+map.canonical+'"'};
+    }
+  }
+  return {hit:false, evidence:'未提及'};
+}
+
+function gradeExam() {
+  return exam.questions.map(function(q, idx){
+    var answer = exam.answers[idx]||'';
+    if (answer==='【已跳过】'||answer==='【超时未作答】') {
+      return { question:q, answer:answer, points:q.points.map(function(p){ return {point:p,hit:false,evidence:'未作答'}; }), score:0 };
+    }
+    var answerLower = answer.toLowerCase().replace(/[，。？！、\s]/g,'');
+    var pointResults = q.points.map(function(p){
+      var keywords = p.split(';').map(function(k){ return k.trim(); }).filter(Boolean);
+      var result = semanticHit(answerLower, keywords);
+      return { point:p, hit:result.hit, evidence:result.evidence };
+    });
+    var score = pointResults.filter(function(p){ return p.hit; }).length / pointResults.length;
+    return { question:q, answer:answer, points:pointResults, score:score };
+  });
+}
+
+function showResults(results) {
+  var totalScore = results.reduce(function(a,r){ return a+r.score; },0)/results.length;
+  var scoreRate = Math.round(totalScore*100);
+  var passed = scoreRate>=60;
+  setExamStep(4);
+  var circle = document.getElementById('result-circle');
+  circle.className = 'score-circle '+(passed?'pass':'fail');
+  document.getElementById('result-score').textContent = scoreRate+'%';
+  document.getElementById('result-status').textContent = passed?'通 过':'未通过';
+  var hitCount = results.reduce(function(a,r){ return a+r.points.filter(function(p){ return p.hit; }).length; },0);
+  var totalPoints = results.reduce(function(a,r){ return a+r.points.length; },0);
+  document.getElementById('result-summary').textContent = '共'+results.length+'题，命中评分点 '+hitCount+'/'+totalPoints+'，得分率 '+scoreRate+'%';
+  var tagsEl = document.getElementById('result-tags');
+  tagsEl.innerHTML = (passed?'<span class="tag tag-success" style="margin:3px;">✅ 考核通过</span>':'<span class="tag tag-danger" style="margin:3px;">❌ 考核未通过</span>')+
+    (scoreRate>=80?'<span class="tag tag-success" style="margin:3px;">🌟 优秀</span>':scoreRate>=60?'<span class="tag tag-info" style="margin:3px;">👍 良好</span>':'<span class="tag tag-warning" style="margin:3px;">⚠️ 需加强</span>');
+
+  var details = document.getElementById('grading-details');
+  details.innerHTML = results.map(function(r,i){
+    var hitPts = r.points.filter(function(p){ return p.hit; }).length;
+    var totalPts = r.points.length;
+    var qScore = Math.round(r.score*100);
+    var allHit = hitPts===totalPts;
+    var pointsHtml = r.points.map(function(p){
+      return '<div class="scoring-point">'+
+        '<span style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:'+(p.hit?'var(--success)':'var(--danger)')+'"></span>'+
+        '<div style="flex:1;"><span style="font-weight:600;">'+escH(p.point.split(';')[0])+'</span>'+
+        '<span class="grading-evidence"> — '+escH(p.evidence)+'</span></div>'+
+        '<span class="tag '+(p.hit?'tag-success':'tag-danger')+'" style="font-size:11px;">'+(p.hit?'命中':'缺失')+'</span></div>';
+    }).join('');
+    return '<div class="grading-item '+(allHit?'hit':qScore>=60?'':'miss')+'">'+
+      '<div class="grading-item-header">'+
+      '<div class="grading-item-title">Q'+(i+1)+'. '+escH(r.question.text.substring(0,35))+'...</div>'+
+      '<span class="tag '+(qScore>=60?'tag-success':'tag-danger')+'">'+qScore+'分 / '+totalPts+'评分点</span></div>'+
+      '<div class="grading-detail" style="margin-bottom:8px;"><strong>📝 作答内容：</strong>'+escH(r.answer.substring(0,100))+(r.answer.length>100?'...':'')+'</div>'+
+      pointsHtml+'</div>';
+  }).join('');
+
+  // Save to ledger
+  store.records.push({
+    id: Date.now(),
+    name: exam.user.name, empId: exam.user.id, dept: exam.user.dept, job: exam.user.job,
+    time: exam.user.startTime, questionCount: results.length, scoreRate: scoreRate, passed: passed,
+    details: results.map(function(r){ return { qText:r.question.text, category:r.question.category||'综合', answer:r.answer, points:r.points, score:Math.round(r.score*100) }; })
+  });
+  saveStore(); updateHomeStats();
+  showToast('阅卷完成！得分率 '+scoreRate+'%，'+(passed?'考核通过 🎉':'考核未通过，需加强学习'), passed?'success':'error');
+}
+
+function retakeExam() { setExamStep(1); document.getElementById('exam-step-register').style.display=''; }
+
+// ===================== QUESTION BANK =====================
+function renderQBank() {
+  var filter = document.getElementById('qbank-filter').value;
+  var search = document.getElementById('qbank-search').value.toLowerCase();
+  var qs = store.questions.filter(function(q){
+    return (!filter||q.category===filter)&&(!search||q.text.toLowerCase().indexOf(search)!==-1);
+  });
+  var tbody = document.getElementById('qbank-tbody');
+  if (qs.length===0) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">没有符合条件的题目</td></tr>'; document.getElementById('qbank-count').textContent='共 0 道题目'; return; }
+  var diffColors = {'简单':'tag-success','中等':'tag-warning','困难':'tag-danger'};
+  tbody.innerHTML = qs.map(function(q,i){
+    var pts = q.points.map(function(p){ return '<span class="tag tag-gray" style="margin:2px;font-size:10px;">'+escH(p.split(';')[0])+'</span>'; }).join('');
+    return '<tr>'+
+      '<td style="color:var(--text-muted)">'+(i+1)+'</td>'+
+      '<td><span class="tag tag-info">'+escH(q.category)+'</span></td>'+
+      '<td style="max-width:280px;line-height:1.5;">'+escH(q.text)+'</td>'+
+      '<td style="max-width:200px;">'+pts+'</td>'+
+      '<td><span class="tag '+(diffColors[q.difficulty]||'tag-gray')+'">'+escH(q.difficulty)+'</span></td>'+
+      '<td>'+
+        '<button class="btn btn-secondary btn-sm" onclick="editQuestion(\''+q.id+'\')">编辑</button> '+
+        '<button class="btn btn-danger btn-sm" onclick="deleteQuestion(\''+q.id+'\')">删除</button>'+
+      '</td></tr>';
+  }).join('');
+  document.getElementById('qbank-count').textContent = '共 '+store.questions.length+' 道题目，显示 '+qs.length+' 道';
+}
+
+function showAddQuestionModal() {
+  store.editingQId=null;
+  document.getElementById('modal-q-title').textContent='新增考核题目';
+  ['mq-text','mq-points','mq-hint','mq-answer'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('mq-category').value='灭火器';
+  document.getElementById('mq-difficulty').value='中等';
+  document.getElementById('modal-question').classList.add('show');
+}
+
+function editQuestion(id) {
+  var q=store.questions.find(function(q){ return q.id===id; });
+  if (!q) return;
+  store.editingQId=id;
+  document.getElementById('modal-q-title').textContent='编辑题目';
+  document.getElementById('mq-text').value=q.text;
+  document.getElementById('mq-category').value=q.category;
+  document.getElementById('mq-difficulty').value=q.difficulty;
+  document.getElementById('mq-points').value=q.points.join('\n');
+  document.getElementById('mq-hint').value=q.hint||'';
+  document.getElementById('mq-answer').value=q.answer||'';
+  document.getElementById('modal-question').classList.add('show');
+}
+
+function saveQuestion() {
+  var text=document.getElementById('mq-text').value.trim();
+  if (!text) { showToast('请输入题目内容','error'); return; }
+  var pointsRaw=document.getElementById('mq-points').value.trim();
+  if (!pointsRaw) { showToast('请至少填写一个评分点','error'); return; }
+  var points=pointsRaw.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  var q={ id:store.editingQId||('q_'+Date.now()), text:text, category:document.getElementById('mq-category').value, difficulty:document.getElementById('mq-difficulty').value, points:points, hint:document.getElementById('mq-hint').value.trim(), answer:document.getElementById('mq-answer').value.trim() };
+  if (store.editingQId) {
+    var idx=store.questions.findIndex(function(x){ return x.id===store.editingQId; });
+    if (idx!==-1) store.questions[idx]=q;
+    showToast('题目已更新','success');
+  } else { store.questions.push(q); showToast('题目已添加','success'); }
+  saveStore(); closeModal('modal-question'); renderQBank(); updateHomeStats();
+}
+
+function deleteQuestion(id) {
+  if (!confirm('确认删除该题目？')) return;
+  store.questions=store.questions.filter(function(q){ return q.id!==id; });
+  saveStore(); renderQBank(); updateHomeStats();
+  showToast('题目已删除','success');
+}
+
+function exportQuestions() {
+  var rows=[['ID','分类','难度','题目内容','评分点','提示','参考答案']];
+  store.questions.forEach(function(q){ rows.push([q.id,q.category,q.difficulty,q.text,q.points.join('|'),q.hint,q.answer]); });
+  downloadCSV(rows,'消防考核题库');
+}
+
+function importSampleQuestions() {
+  var samples=[
+    {id:'q_s1',text:'请简述灭火器的日常检查要点',category:'灭火器',difficulty:'中等',
+     points:['压力表;气压表;指针;绿区;气压正常','瓶体;罐子;瓶身;锈蚀;损坏;外观完好','喷管;管子;皮管;堵塞;完好','保险销;铅封;插销;锁销;完整'],
+     hint:'请从压力、外观、配件等方面回答',answer:'①压力表指针在绿区；②瓶体无锈蚀损坏；③喷管完好无堵塞；④保险销铅封完整。'},
+    {id:'q_s2',text:'电器发生火灾时，扑救的第一步应该怎么做？',category:'应急处置',difficulty:'中等',
+     points:['切断电源;断电;拉闸;总闸;拉下来;断掉电;关电源'],
+     hint:'注意不能直接用水扑救通电的电器',answer:'第一步必须立即切断电源（拉闸断电），防止触电；断电后再使用干粉或CO₂灭火器扑救。'},
+    {id:'q_s3',text:'发现火情后，应如何向上级报告？',category:'火灾报警',difficulty:'简单',
+     points:['消控中心;控制室;消防控制;报告上级;通知管理员','119;消防电话;拨打119','位置;地点;着火位置;火灾地点','情况;火势;燃烧情况'],
+     hint:'国企内部有规范的报告流程',answer:'①向消防控制中心报告着火位置和火情；②拨打119说明具体地址；③组织人员疏散。'},
+    {id:'q_s4',text:'火灾逃生时，如何正确通过充满烟雾的走廊？',category:'疏散逃生',difficulty:'中等',
+     points:['低姿;弯腰;匍匐;爬行;俯身;蹲下','捂住口鼻;湿毛巾;湿布;防烟;掩住口','安全出口;疏散门;疏散通道;逃生通道;出口'],
+     hint:'烟雾有毒且集中在高处',answer:'①用湿毛巾捂住口鼻；②低姿或匍匐前进（烟雾在高处）；③沿疏散通道向安全出口撤离；④不乘电梯。'},
+    {id:'q_s5',text:'请描述消防巡检人员日常巡检的主要工作内容',category:'日常巡检',difficulty:'中等',
+     points:['灭火器;灭火设备;消防器材','疏散通道;安全出口;通道畅通;出口标识','消火栓;水带;水枪','应急灯;应急照明;疏散标识'],
+     hint:'从消防设备、疏散通道、标识等方面回答',answer:'①检查灭火器在位、压力正常；②疏散通道畅通；③消火栓水带水枪完好；④应急照明和疏散标识正常。'},
+    {id:'q_s6',text:'二氧化碳灭火器适用于哪些火灾场景，有何使用注意事项？',category:'灭火器',difficulty:'困难',
+     points:['电气;电器;电路;电子设备;精密仪器','不导电;绝缘;安全;避免触电','近距离;不要离太近;保持距离','室外;风大;效果差;室内'],
+     hint:'特别注意适用和不适用场景',answer:'适用：电气火灾、精密仪器（不导电无残留）。注意：①不用于深层火灾；②室外风大效果差；③不直接接触金属喇叭（防冻伤）。'},
+    {id:'q_s7',text:'请说明手提式干粉灭火器的正确使用步骤',category:'灭火器',difficulty:'中等',
+     points:['拔销;拔掉保险销;拔出销子','距离;靠近;站在火源侧方;适当距离','压把;按下;握住把手;压下','扫射;从根部;对准火焰根部;从外向内'],
+     hint:'记住口诀：拔、握、压、扫',answer:'①拔——拔出保险销；②握——一手握喷管；③压——压下压把；④扫——对准火焰根部左右扫射。'},
+    {id:'q_s8',text:'如果发现安全出口被锁住或堵塞，应如何处置？',category:'日常巡检',difficulty:'简单',
+     points:['立即清除;移走;清理堵塞物;马上处置','上报;报告;通知;汇报','记录;拍照;存档;留证','整改;追责;追踪'],
+     hint:'安全出口保持畅通是基本要求',answer:'①立即清除堵塞物；②向负责人报告；③留存整改记录；④追踪整改结果。'},
+    {id:'q_s9',text:'消防水带使用后应如何保养维护？',category:'日常巡检',difficulty:'简单',
+     points:['清洗;冲洗;清理泥沙','晾干;烘干;干燥;避免潮湿','检查;破损;老化;渗漏','卷好;折叠;存放;归位'],
+     hint:'清洁、干燥、检查、存放四步',answer:'①冲洗清除污垢；②充分晾干后存放；③检查有无破损老化漏水；④卷好存于专用箱内。'},
+    {id:'q_s10',text:'请解释"三会"在消防安全培训中的含义',category:'应急处置',difficulty:'简单',
+     points:['会报警;报警;通报火情;拨打119','会灭火;使用灭火器;初期灭火','会逃生疏散;疏散;逃生;撤离;逃跑'],
+     hint:'消防培训的核心基础要求',answer:'消防"三会"：①会报警——拨打119及内部报警；②会灭火——使用灭火器扑救初期火灾；③会逃生疏散——引导人员有序撤离。'},
+  ];
+  var existing=store.questions.map(function(q){ return q.id; });
+  var added=0;
+  samples.forEach(function(s){ if(existing.indexOf(s.id)===-1){ store.questions.push(s); added++; } });
+  saveStore(); renderQBank(); updateHomeStats();
+  showToast('已导入 '+added+' 道示例题目','success');
+}
+
+// ===================== LEDGER =====================
+function renderLedger() {
+  var filter=document.getElementById('ledger-filter').value;
+  var search=document.getElementById('ledger-search').value.toLowerCase();
+  var records=store.records.filter(function(r){
+    var mf=!filter||(filter==='pass'?r.passed:!r.passed);
+    var ms=!search||r.name.indexOf(search)!==-1||r.empId.indexOf(search)!==-1;
+    return mf&&ms;
+  }).slice().sort(function(a,b){ return b.id-a.id; });
+  var tbody=document.getElementById('ledger-tbody');
+  if (records.length===0) { tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-muted);">暂无考核记录</td></tr>'; document.getElementById('ledger-count').textContent='共 0 条记录'; return; }
+  tbody.innerHTML=records.map(function(r,i){
+    var scoreColor=r.scoreRate>=80?'var(--success)':r.scoreRate>=60?'var(--info)':'var(--primary)';
+    var barClass=r.scoreRate>=80?'green':r.scoreRate>=60?'blue':'red';
+    return '<tr>'+
+      '<td style="color:var(--text-muted)">'+(i+1)+'</td>'+
+      '<td><strong>'+escH(r.name)+'</strong></td>'+
+      '<td style="color:var(--text-muted)">'+escH(r.empId)+'</td>'+
+      '<td>'+escH(r.dept)+'</td>'+
+      '<td>'+escH(r.job)+'</td>'+
+      '<td style="font-size:12px;color:var(--text-muted)">'+escH(r.time)+'</td>'+
+      '<td>'+r.questionCount+'题</td>'+
+      '<td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-bar-wrap" style="width:60px;"><div class="progress-bar '+barClass+'" style="width:'+r.scoreRate+'%"></div></div><span style="font-size:13px;font-weight:700;color:'+scoreColor+';">'+r.scoreRate+'%</span></div></td>'+
+      '<td><span class="tag '+(r.passed?'tag-success':'tag-danger')+'">'+(r.passed?'通过':'未通过')+'</span></td>'+
+      '<td><button class="btn btn-info btn-sm" onclick="showLedgerDetail('+r.id+')">详情</button></td>'+
+      '</tr>';
+  }).join('');
+  document.getElementById('ledger-count').textContent='共 '+store.records.length+' 条记录，显示 '+records.length+' 条';
+}
+
+function showLedgerDetail(id) {
+  var r=store.records.find(function(r){ return r.id==id; });
+  if (!r) return;
+  var scoreColor=r.scoreRate>=60?'var(--success)':'var(--primary)';
+  var content=document.getElementById('ledger-detail-content');
+  var detailHtml=r.details.map(function(d,i){
+    var ptsHtml=d.points.map(function(p){
+      return '<span class="tag '+(p.hit?'tag-success':'tag-danger')+'" style="margin:2px;font-size:11px;">'+escH(p.point.split(';')[0])+(p.hit?'✓':'✗')+'</span>';
+    }).join('');
+    return '<div class="grading-item '+(d.score>=60?'hit':'miss')+'" style="margin-bottom:10px;">'+
+      '<div class="grading-item-header"><div class="grading-item-title" style="font-size:13px;">Q'+(i+1)+'. '+escH(d.qText.substring(0,40))+'</div>'+
+      '<span class="tag '+(d.score>=60?'tag-success':'tag-danger')+'">'+d.score+'分</span></div>'+
+      '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">作答：'+escH(d.answer.substring(0,80))+'</div>'+
+      ptsHtml+'</div>';
+  }).join('');
+  content.innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;font-size:13px;">'+
+    '<div><span style="color:var(--text-muted)">姓名：</span><strong>'+escH(r.name)+'</strong></div>'+
+    '<div><span style="color:var(--text-muted)">工号：</span><strong>'+escH(r.empId)+'</strong></div>'+
+    '<div><span style="color:var(--text-muted)">部门：</span><strong>'+escH(r.dept)+'</strong></div>'+
+    '<div><span style="color:var(--text-muted)">岗位：</span><strong>'+escH(r.job)+'</strong></div>'+
+    '<div><span style="color:var(--text-muted)">时间：</span><strong>'+escH(r.time)+'</strong></div>'+
+    '<div><span style="color:var(--text-muted)">结果：</span><span class="tag '+(r.passed?'tag-success':'tag-danger')+'">'+r.scoreRate+'% '+(r.passed?'通过':'未通过')+'</span></div>'+
+    '</div><hr class="divider">'+detailHtml;
+  document.getElementById('modal-ledger-detail').classList.add('show');
+}
+
+function exportLedger() {
+  if (store.records.length===0) { showToast('暂无数据可导出','warning'); return; }
+  var rows=[['姓名','工号','部门','岗位','考核时间','题数','得分率','结果']];
+  store.records.forEach(function(r){ rows.push([r.name,r.empId,r.dept,r.job,r.time,r.questionCount,r.scoreRate+'%',r.passed?'通过':'未通过']); });
+  downloadCSV(rows,'消防考核台账_'+new Date().toLocaleDateString('zh-CN'));
+  showToast('台账已导出','success');
+}
+
+function clearLedger() {
+  if (!confirm('确认清空所有考核记录？此操作不可恢复。')) return;
+  store.records=[];
+  saveStore(); renderLedger(); updateHomeStats();
+  showToast('台账已清空','success');
+}
+
+// ===================== ANALYSIS =====================
+function renderAnalysis() {
+  var records=store.records;
+  document.getElementById('an-total').textContent=records.length;
+  if (records.length===0) {
+    ['an-pass-rate','an-avg','an-weak'].forEach(function(id){ document.getElementById(id).textContent='—'; });
+    var empty='<div class="empty-state"><div class="empty-icon">📭</div><p>暂无考核数据，请先完成考核</p></div>';
+    ['weak-chart','category-chart','score-trend'].forEach(function(id){ document.getElementById(id).innerHTML=empty; });
+    document.getElementById('dept-tbody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">暂无数据</td></tr>';
+    return;
+  }
+  var passRate=Math.round(records.filter(function(r){ return r.passed; }).length/records.length*100);
+  var avgScore=Math.round(records.reduce(function(a,r){ return a+r.scoreRate; },0)/records.length);
+  document.getElementById('an-pass-rate').textContent=passRate+'%';
+  document.getElementById('an-avg').textContent=avgScore+'%';
+
+  // Weak points
+  var pointMiss={};
+  records.forEach(function(r){
+    r.details.forEach(function(d){
+      d.points.forEach(function(p){
+        var key=p.point.split(';')[0];
+        if (!pointMiss[key]) pointMiss[key]={miss:0,total:0};
+        pointMiss[key].total++;
+        if (!p.hit) pointMiss[key].miss++;
+      });
+    });
+  });
+  var sorted=Object.entries(pointMiss).filter(function(e){ return e[1].total>=1; })
+    .sort(function(a,b){ return (b[1].miss/b[1].total)-(a[1].miss/a[1].total); }).slice(0,8);
+  if (sorted.length>0) {
+    document.getElementById('an-weak').textContent=sorted[0][0];
+    document.getElementById('weak-chart').innerHTML=sorted.map(function(e){
+      var name=e[0]; var val=e[1];
+      var missRate=Math.round(val.miss/val.total*100);
+      var color=missRate>=60?'var(--primary)':missRate>=30?'var(--warning)':'var(--success)';
+      return '<div class="chart-bar-row">'+
+        '<div class="chart-bar-label">'+escH(name)+'</div>'+
+        '<div class="chart-bar-wrap"><div class="chart-bar" style="width:'+missRate+'%;background:'+color+';">'+missRate+'%</div></div>'+
+        '<div class="chart-bar-value" style="color:'+color+';">'+missRate+'%</div></div>';
+    }).join('');
+  }
+
+  // Category pass rate
+  var catData={};
+  records.forEach(function(r){
+    r.details.forEach(function(d){
+      var cat=d.category||'综合';
+      if (!catData[cat]) catData[cat]={pass:0,total:0};
+      catData[cat].total++;
+      if (d.score>=60) catData[cat].pass++;
+    });
+  });
+  var colors=['var(--primary)','var(--info)','var(--success)','var(--warning)','#9b59b6'];
+  var catHtml=Object.entries(catData).map(function(e,i){
+    var rate=Math.round(e[1].pass/e[1].total*100);
+    var color=colors[i%colors.length];
+    return '<div class="chart-bar-row">'+
+      '<div class="chart-bar-label">'+escH(e[0])+'</div>'+
+      '<div class="chart-bar-wrap"><div class="chart-bar" style="width:'+rate+'%;background:'+color+';">'+rate+'%</div></div>'+
+      '<div class="chart-bar-value" style="color:'+color+';">'+rate+'%</div></div>';
+  }).join('');
+  document.getElementById('category-chart').innerHTML=catHtml||'<div class="empty-state"><div class="empty-icon">📭</div><p>暂无分类数据</p></div>';
+
+  // Score trend
+  var recent=records.slice().sort(function(a,b){ return b.id-a.id; }).slice(0,10).reverse();
+  var trendHtml=recent.map(function(r){
+    var h=Math.max(4,Math.round(r.scoreRate/100*120));
+    var color=r.scoreRate>=60?'var(--success)':'var(--primary)';
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">'+
+      '<div style="font-size:11px;font-weight:700;color:'+color+';">'+r.scoreRate+'%</div>'+
+      '<div style="width:100%;max-width:40px;height:'+h+'px;background:'+color+';border-radius:4px 4px 0 0;min-height:4px;"></div>'+
+      '<div style="font-size:10px;color:var(--text-muted);text-align:center;max-width:40px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+escH(r.name)+'</div></div>';
+  }).join('');
+  document.getElementById('score-trend').innerHTML=
+    '<div style="display:flex;align-items:flex-end;gap:6px;height:152px;padding-top:16px;border-bottom:2px solid var(--border);">'+trendHtml+'</div>'+
+    '<div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:center;">← 时间顺序（最近10次） →</div>';
+
+  // Dept analysis
+  var deptData={};
+  records.forEach(function(r){
+    if (!deptData[r.dept]) deptData[r.dept]={pass:0,total:0,scoreSum:0};
+    deptData[r.dept].total++;
+    if (r.passed) deptData[r.dept].pass++;
+    deptData[r.dept].scoreSum+=r.scoreRate;
+  });
+  var deptHtml=Object.entries(deptData).sort(function(a,b){ return b[1].total-a[1].total; }).map(function(e){
+    var dept=e[0]; var d=e[1];
+    var rate=Math.round(d.pass/d.total*100);
+    var avg=Math.round(d.scoreSum/d.total);
+    var rateColor=rate>=80?'var(--success)':rate>=60?'var(--info)':'var(--primary)';
+    var barClass=rate>=80?'green':rate>=60?'blue':'red';
+    return '<tr>'+
+      '<td><strong>'+escH(dept)+'</strong></td>'+
+      '<td>'+d.total+'</td>'+
+      '<td>'+d.pass+'</td>'+
+      '<td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-bar-wrap" style="width:80px;"><div class="progress-bar '+barClass+'" style="width:'+rate+'%"></div></div><span style="font-size:13px;font-weight:700;color:'+rateColor+';">'+rate+'%</span></div></td>'+
+      '<td style="font-weight:700;color:'+rateColor+';">'+avg+'%</td></tr>';
+  }).join('');
+  document.getElementById('dept-tbody').innerHTML=deptHtml||'<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">暂无数据</td></tr>';
+}
+
+// ===================== UTILS =====================
+function escH(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function showToast(msg, type) {
+  type=type||'info';
+  var container=document.getElementById('toast-container');
+  var toast=document.createElement('div');
+  toast.className='toast '+type;
+  var icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};
+  toast.innerHTML='<span>'+(icons[type]||'ℹ️')+'</span><span>'+escH(msg)+'</span>';
+  container.appendChild(toast);
+  setTimeout(function(){ toast.style.opacity='0'; toast.style.transform='translateX(30px)'; toast.style.transition='all 0.3s'; setTimeout(function(){ toast.remove(); },300); },3000);
+}
+
+function downloadCSV(rows, filename) {
+  var bom='\uFEFF';
+  var csv=bom+rows.map(function(r){ return r.map(function(v){ return '"'+String(v||'').replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=filename+'.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+document.querySelectorAll('.modal-overlay').forEach(function(overlay){
+  overlay.addEventListener('click',function(e){ if(e.target===overlay) overlay.classList.remove('show'); });
+});
+
+init();
+</script>
+</body>
+</html>
