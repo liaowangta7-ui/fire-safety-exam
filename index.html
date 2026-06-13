@@ -2,469 +2,862 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AI智能消防安全巡检考核系统</title>
 <style>
-  :root {
-    --primary: #e74c3c; --primary-dark: #c0392b; --primary-light: #fadbd8;
-    --secondary: #2c3e50; --accent: #f39c12;
-    --success: #27ae60; --success-light: #d5f5e3;
-    --danger: #e74c3c; --danger-light: #fadbd8;
-    --warning: #f39c12; --warning-light: #fef9e7;
-    --info: #3498db; --info-light: #d6eaf8;
-    --bg: #f5f6fa; --card: #ffffff; --border: #e0e0e0;
-    --text: #2c3e50; --text-muted: #7f8c8d;
-    --shadow: 0 2px 12px rgba(0,0,0,0.08);
-    --radius: 12px; --radius-sm: 8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-  .app-container { display: flex; min-height: 100vh; }
-  .sidebar { width: 240px; min-width: 240px; background: var(--secondary); color: #fff; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; box-shadow: 3px 0 12px rgba(0,0,0,0.15); }
-  .sidebar-logo { padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-  .sidebar-logo .logo-icon { width: 44px; height: 44px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 10px; }
-  .sidebar-logo h2 { font-size: 14px; font-weight: 700; line-height: 1.4; }
-  .sidebar-logo p { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 3px; }
-  .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
-  .nav-section-title { font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; padding: 12px 20px 4px; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; cursor: pointer; transition: all 0.2s; font-size: 13.5px; border-left: 3px solid transparent; color: rgba(255,255,255,0.75); }
-  .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
-  .nav-item.active { background: rgba(231,76,60,0.2); border-left-color: var(--primary); color: #fff; }
-  .nav-item .nav-icon { font-size: 17px; width: 22px; text-align: center; }
-  .sidebar-footer { padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.6; }
-  .main-content { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-  .top-bar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 90; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
-  .top-bar h1 { font-size: 17px; font-weight: 700; }
-  .top-bar .badge { background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
-  .page-content { padding: 28px; flex: 1; }
-  .page-section { display: none; }
-  .page-section.active { display: block; }
-  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px; }
-  .card-title { font-size: 15px; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-  .card-title .icon { font-size: 18px; }
-  .form-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
-  .form-grid.cols3 { grid-template-columns: repeat(3,1fr); }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  .form-group.full { grid-column: 1/-1; }
-  label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
-  input[type=text],input[type=number],select,textarea { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.2s,box-shadow 0.2s; background: #fff; width: 100%; }
-  input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(231,76,60,0.1); }
-  textarea { resize: vertical; min-height: 70px; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; font-family: inherit; }
-  .btn-primary { background: var(--primary); color: #fff; }
-  .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 4px 12px rgba(231,76,60,0.35); }
-  .btn-secondary { background: #ecf0f1; color: var(--text); }
-  .btn-secondary:hover { background: #dfe6e9; }
-  .btn-success { background: var(--success); color: #fff; }
-  .btn-success:hover { background: #229954; }
-  .btn-warning { background: var(--warning); color: #fff; }
-  .btn-info { background: var(--info); color: #fff; }
-  .btn-danger { background: #e74c3c; color: #fff; }
-  .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
-  .btn-outline:hover { background: var(--primary-light); }
-  .btn-sm { padding: 6px 12px; font-size: 12px; }
-  .btn-lg { padding: 14px 28px; font-size: 16px; }
-  .btn-full { width: 100%; justify-content: center; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
-  .tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .tag-success { background: var(--success-light); color: var(--success); }
-  .tag-danger { background: var(--danger-light); color: var(--danger); }
-  .tag-warning { background: var(--warning-light); color: var(--warning); }
-  .tag-info { background: var(--info-light); color: var(--info); }
-  .tag-gray { background: #f0f0f0; color: #666; }
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-  thead th { background: #f8f9fa; color: var(--text-muted); font-weight: 600; padding: 10px 14px; text-align: left; border-bottom: 2px solid var(--border); white-space: nowrap; }
-  tbody td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
-  tbody tr:hover { background: #fafafa; }
-  tbody tr:last-child td { border-bottom: none; }
-  .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 20px; }
-  .stat-card { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px; }
-  .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
-  .stat-icon.red { background: var(--primary-light); }
-  .stat-icon.green { background: var(--success-light); }
-  .stat-icon.blue { background: var(--info-light); }
-  .stat-icon.orange { background: var(--warning-light); }
-  .stat-value { font-size: 26px; font-weight: 800; line-height: 1; }
-  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
-  .progress-bar-wrap { background: #ecf0f1; border-radius: 20px; overflow: hidden; height: 10px; }
-  .progress-bar { height: 100%; border-radius: 20px; transition: width 0.5s; }
-  .progress-bar.red { background: var(--primary); }
-  .progress-bar.green { background: var(--success); }
-  .progress-bar.blue { background: var(--info); }
-  .progress-bar.orange { background: var(--warning); }
-  .step-indicator { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 32px; }
-  .step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; position: relative; }
-  .step::before { content: ''; position: absolute; top: 18px; left: calc(50% + 22px); width: calc(100% - 44px); height: 2px; background: var(--border); }
-  .step:last-child::before { display: none; }
-  .step.done::before { background: var(--success); }
-  .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; background: #ecf0f1; color: var(--text-muted); border: 2px solid var(--border); transition: all 0.3s; z-index: 1; }
-  .step.active .step-circle { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(231,76,60,0.15); }
-  .step.done .step-circle { background: var(--success); color: #fff; border-color: var(--success); }
-  .step-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-  .step.active .step-label { color: var(--primary); font-weight: 700; }
-  .step.done .step-label { color: var(--success); }
-  .voice-btn-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 24px 0; }
-  .voice-btn { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg,var(--primary),var(--primary-dark)); border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 36px; color: #fff; box-shadow: 0 4px 20px rgba(231,76,60,0.35); transition: all 0.2s; }
-  .voice-btn:hover { transform: scale(1.05); }
-  .voice-btn.recording { animation: pulse 1.2s ease-in-out infinite; }
-  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.5); } 50% { box-shadow: 0 0 0 18px rgba(231,76,60,0); } }
-  .voice-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
-  .voice-status { font-size: 12px; color: var(--primary); min-height: 20px; font-weight: 600; text-align: center; }
-  .question-box { background: linear-gradient(135deg,#fff5f5,#fff); border: 2px solid var(--primary-light); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
-  .question-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: flex; gap: 12px; }
-  .question-text { font-size: 16px; font-weight: 700; line-height: 1.6; color: var(--text); }
-  .question-hint { font-size: 12px; color: var(--text-muted); margin-top: 10px; font-style: italic; }
-  .score-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 16px; font-weight: 800; }
-  .score-circle.pass { background: linear-gradient(135deg,#27ae60,#2ecc71); color: #fff; box-shadow: 0 4px 20px rgba(39,174,96,0.35); }
-  .score-circle.fail { background: linear-gradient(135deg,#e74c3c,#c0392b); color: #fff; box-shadow: 0 4px 20px rgba(231,76,60,0.35); }
-  .score-circle .score-num { font-size: 36px; line-height: 1; }
-  .score-circle .score-text { font-size: 13px; margin-top: 2px; }
-  .grading-item { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px; }
-  .grading-item.hit { border-color: #a9dfbf; background: #f9fff9; }
-  .grading-item.miss { border-color: #f5b7b1; background: #fff9f9; }
-  .grading-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .grading-item-title { font-size: 14px; font-weight: 700; }
-  .grading-detail { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
-  .grading-evidence { font-size: 12px; color: var(--info); margin-top: 4px; }
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-  .modal-overlay.show { display: flex; }
-  .modal { background: #fff; border-radius: var(--radius); padding: 28px; max-width: 560px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; animation: slideUp 0.25s ease; }
-  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
-  .modal-close { cursor: pointer; font-size: 20px; color: var(--text-muted); background: none; border: none; line-height: 1; }
-  .modal-close:hover { color: var(--primary); }
-  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-  .toast { background: var(--secondary); color: #fff; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); animation: toastIn 0.3s ease; max-width: 300px; display: flex; align-items: center; gap: 8px; }
-  .toast.success { background: var(--success); }
-  .toast.error { background: var(--primary); }
-  .toast.warning { background: var(--warning); }
-  @keyframes toastIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  .timer-display { font-size: 28px; font-weight: 800; color: var(--primary); text-align: center; font-variant-numeric: tabular-nums; letter-spacing: 2px; }
-  .timer-display.warning { color: var(--warning); animation: blink 0.8s ease infinite; }
-  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-  .chart-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-  .chart-bar-label { width: 140px; font-size: 13px; flex-shrink: 0; text-align: right; color: var(--text-muted); }
-  .chart-bar-wrap { flex: 1; background: #ecf0f1; border-radius: 20px; overflow: hidden; height: 22px; }
-  .chart-bar { height: 100%; border-radius: 20px; display: flex; align-items: center; padding-left: 10px; font-size: 11px; color: #fff; font-weight: 700; transition: width 0.7s cubic-bezier(0.25,0.46,0.45,0.94); min-width: 2px; }
-  .chart-bar-value { width: 40px; text-align: right; font-size: 12px; font-weight: 700; }
-  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
-  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
-  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-  .info-banner { background: linear-gradient(135deg,var(--info-light),#fff); border: 1.5px solid #a9cce3; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: #1a5276; display: flex; gap: 8px; align-items: flex-start; margin-bottom: 16px; }
-  .scoring-point { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 6px; background: #f8f9fa; }
-  .question-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-  .q-nav-btn { width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; cursor: pointer; border: 2px solid var(--border); background: #fff; color: var(--text); transition: all 0.15s; }
-  .q-nav-btn.current { border-color: var(--primary); background: var(--primary); color: #fff; }
-  .q-nav-btn.answered { border-color: var(--success); background: var(--success-light); color: var(--success); }
-  .q-nav-btn.skipped { border-color: var(--warning); background: var(--warning-light); color: var(--warning); }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-  @media(max-width:900px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
-  @media(max-width:640px) { .sidebar { width: 200px; } .main-content { margin-left: 200px; } .stats-grid { grid-template-columns: 1fr 1fr; } .form-grid { grid-template-columns: 1fr; } .page-content { padding: 16px; } }
+:root{
+  --primary:#e74c3c;--primary-light:#ffeaea;--secondary:#2c3e50;--success:#27ae60;--success-light:#eafaf1;
+  --info:#2980b9;--info-light:#eaf4fb;--warning:#f39c12;--warning-light:#fef9e7;--danger:#e74c3c;
+  --bg:#f4f6f9;--card:#fff;--border:#e8ecf0;--text:#2c3e50;--text-muted:#8492a6;--sidebar-w:240px;
+  --radius:12px;--shadow:0 2px 12px rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;}
+a{text-decoration:none;color:inherit;}
+button{cursor:pointer;font-family:inherit;}
+input,select,textarea{font-family:inherit;font-size:14px;}
+
+/* ===== LAYOUT ===== */
+.app-wrap{display:flex;min-height:100vh;}
+.sidebar{width:var(--sidebar-w);background:var(--secondary);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;transition:transform .3s ease;box-shadow:3px 0 20px rgba(0,0,0,0.2);}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199;}
+.main-content{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* ===== SIDEBAR ===== */
+.sidebar-logo{padding:20px 18px 14px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.logo-row{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:40px;height:40px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.logo-text h2{font-size:13px;font-weight:700;line-height:1.4;}
+.logo-text p{font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;}
+.sidebar-section{padding:10px 0 4px 18px;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;}
+.sidebar-nav{flex:1;padding:8px 0;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;transition:all .2s;border-left:3px solid transparent;font-size:13px;color:rgba(255,255,255,0.7);}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:#fff;}
+.nav-item.active{background:rgba(231,76,60,0.15);border-left-color:var(--primary);color:#fff;font-weight:600;}
+.nav-item .nav-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
+.sidebar-footer{padding:12px 18px;border-top:1px solid rgba(255,255,255,0.08);font-size:10px;color:rgba(255,255,255,0.25);line-height:1.7;}
+
+/* ===== TOP BAR ===== */
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.05);}
+.menu-btn{display:none;background:none;border:none;font-size:20px;color:var(--text);padding:6px;border-radius:8px;}
+.topbar-title{font-size:16px;font-weight:700;flex:1;}
+.topbar-badge{font-size:11px;background:var(--primary-light);color:var(--primary);padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap;}
+.data-notice{display:flex;align-items:center;gap:6px;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:5px 10px;font-size:11px;color:#b8860b;cursor:pointer;transition:background .2s;white-space:nowrap;}
+.data-notice:hover{background:#fff3cd;}
+
+/* ===== PAGE CONTENT ===== */
+.page-content{padding:20px 24px;flex:1;}
+.page-section{display:none;}
+.page-section.active{display:block;}
+
+/* ===== CARDS ===== */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:16px;border:1px solid var(--border);}
+.card-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.card-title .icon{font-size:18px;}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+
+/* ===== STATS GRID ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.stat-icon.red{background:#ffeaea;} .stat-icon.green{background:#eafaf1;} .stat-icon.blue{background:#eaf4fb;} .stat-icon.orange{background:#fef5e7;}
+.stat-value{font-size:22px;font-weight:800;line-height:1.2;}
+.stat-label{font-size:11px;color:var(--text-muted);margin-top:2px;}
+
+/* ===== TWO COL ===== */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;border:none;font-size:13px;font-weight:600;transition:all .2s;cursor:pointer;white-space:nowrap;}
+.btn-primary{background:var(--primary);color:#fff;} .btn-primary:hover{background:#c0392b;transform:translateY(-1px);}
+.btn-success{background:var(--success);color:#fff;} .btn-success:hover{background:#219a52;}
+.btn-secondary{background:var(--bg);color:var(--text);border:1px solid var(--border);} .btn-secondary:hover{background:#e8ecf0;}
+.btn-info{background:var(--info);color:#fff;} .btn-info:hover{background:#2471a3;}
+.btn-danger{background:var(--danger);color:#fff;} .btn-danger:hover{background:#c0392b;}
+.btn-warning{background:var(--warning);color:#fff;} .btn-warning:hover{background:#d68910;}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.btn-lg{padding:13px 24px;font-size:15px;border-radius:10px;}
+.btn-block{width:100%;justify-content:center;}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ===== FORMS ===== */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group label{font-size:13px;font-weight:600;color:var(--text);}
+input[type=text],input[type=number],select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none;transition:border .2s;background:#fff;color:var(--text);}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);}
+textarea{resize:vertical;min-height:80px;}
+
+/* ===== EXAM STEPS ===== */
+.step-bar{display:flex;align-items:center;margin-bottom:20px;background:#fff;border-radius:var(--radius);padding:16px 20px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.step{display:flex;align-items:center;gap:8px;flex:1;}
+.step-circle{width:30px;height:30px;border-radius:50%;background:#e8ecf0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;transition:all .3s;}
+.step.active .step-circle{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(231,76,60,0.4);}
+.step.done .step-circle{background:var(--success);color:#fff;}
+.step-label{font-size:12px;color:var(--text-muted);}
+.step.active .step-label{color:var(--primary);font-weight:600;}
+.step.done .step-label{color:var(--success);}
+.step-line{height:2px;flex:1;background:#e8ecf0;margin:0 8px;}
+.step.done + .step .step-line,.step.done .step-line{background:var(--success);}
+
+/* ===== EXAM ANSWER ===== */
+.exam-answer-wrap{display:grid;grid-template-columns:1fr 300px;gap:16px;}
+.q-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.q-num{font-size:13px;color:var(--text-muted);}
+.q-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.q-text{font-size:16px;font-weight:700;line-height:1.6;margin-bottom:10px;padding:14px;background:var(--bg);border-radius:10px;border-left:4px solid var(--primary);}
+.q-hint{font-size:12px;color:var(--info);background:var(--info-light);padding:8px 12px;border-radius:8px;margin-bottom:14px;}
+
+/* ===== VOICE ===== */
+.voice-area{display:flex;flex-direction:column;align-items:center;padding:16px 0 10px;}
+.voice-btn{width:80px;height:80px;border-radius:50%;border:none;font-size:34px;cursor:pointer;background:linear-gradient(135deg,var(--primary),#c0392b);color:#fff;box-shadow:0 4px 20px rgba(231,76,60,0.4);transition:all .3s;display:flex;align-items:center;justify-content:center;}
+.voice-btn:hover{transform:scale(1.06);}
+.voice-btn.recording{animation:voicePulse 1.2s ease-in-out infinite;background:linear-gradient(135deg,#e74c3c,#c0392b);}
+@keyframes voicePulse{0%,100%{box-shadow:0 0 0 0 rgba(231,76,60,0.4);}50%{box-shadow:0 0 0 14px rgba(231,76,60,0);transform:scale(1.05);}}
+.voice-label{font-size:12px;color:var(--text-muted);margin-top:8px;text-align:center;}
+.voice-status{font-size:12px;margin-top:4px;font-weight:600;min-height:18px;text-align:center;}
+.voice-status.recording{color:var(--danger);}
+.voice-status.done{color:var(--success);}
+.answer-area{margin-top:10px;}
+.answer-area label{font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;}
+
+/* ===== TIMER ===== */
+.timer-display{font-size:28px;font-weight:800;color:var(--info);font-variant-numeric:tabular-nums;text-align:center;}
+.timer-display.warning{color:var(--danger);animation:timerBlink .8s ease-in-out infinite;}
+@keyframes timerBlink{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+/* ===== PROGRESS ===== */
+.progress-bar-wrap{width:100%;height:8px;background:#e8ecf0;border-radius:4px;overflow:hidden;}
+.progress-bar{height:100%;border-radius:4px;transition:width .4s ease;}
+.progress-bar.red{background:linear-gradient(90deg,var(--danger),#c0392b);}
+.progress-bar.green{background:linear-gradient(90deg,var(--success),#1e8449);}
+.progress-bar.blue{background:linear-gradient(90deg,var(--info),#1a5276);}
+.progress-bar.orange{background:linear-gradient(90deg,var(--warning),#d68910);}
+
+/* ===== Q NAV ===== */
+.q-nav-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.q-nav-btn{width:30px;height:30px;border-radius:6px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.q-nav-btn.current{background:var(--primary);color:#fff;border-color:var(--primary);}
+.q-nav-btn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.q-nav-btn.skipped{background:var(--warning);color:#fff;border-color:var(--warning);}
+
+/* ===== SCORE CIRCLE ===== */
+.score-circle{width:130px;height:130px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 16px;border:6px solid #e8ecf0;}
+.score-circle.pass{border-color:var(--success);background:var(--success-light);}
+.score-circle.fail{border-color:var(--danger);background:var(--primary-light);}
+.score-num{font-size:30px;font-weight:900;line-height:1;}
+.score-text{font-size:12px;font-weight:600;margin-top:4px;}
+
+/* ===== GRADING ===== */
+.grading-item{border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;}
+.grading-item.hit{border-color:#a8e6cf;background:#f0fff6;}
+.grading-item.miss{border-color:#ffcdd2;background:#fff5f5;}
+.grading-item-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;}
+.grading-item-title{font-weight:600;font-size:13px;flex:1;}
+.grading-detail{font-size:12px;color:var(--text-muted);margin-bottom:8px;background:var(--bg);padding:8px 10px;border-radius:6px;line-height:1.6;}
+.scoring-point{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;margin-bottom:4px;font-size:12px;background:rgba(255,255,255,0.6);}
+.grading-evidence{color:var(--text-muted);font-size:11px;}
+
+/* ===== TAGS ===== */
+.tag{display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;}
+.tag-success{background:#eafaf1;color:var(--success);}
+.tag-danger{background:#ffeaea;color:var(--danger);}
+.tag-info{background:#eaf4fb;color:var(--info);}
+.tag-warning{background:#fef9e7;color:var(--warning);}
+.tag-gray{background:#f0f0f0;color:#666;}
+
+/* ===== TABLE ===== */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;min-width:500px;}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+th{font-size:12px;color:var(--text-muted);background:#fafbfc;font-weight:600;white-space:nowrap;}
+tr:hover td{background:#fafbfc;}
+td{font-size:13px;}
+
+/* ===== CHARTS ===== */
+.chart-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.chart-bar-label{width:80px;font-size:12px;text-align:right;color:var(--text-muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.chart-bar-wrap{flex:1;height:22px;background:#f0f0f0;border-radius:4px;overflow:hidden;}
+.chart-bar{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:11px;color:#fff;font-weight:600;min-width:30px;transition:width .6s ease;}
+.chart-bar-value{width:38px;font-size:12px;font-weight:700;text-align:right;flex-shrink:0;}
+
+/* ===== MODAL ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:var(--radius);padding:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{background:none;border:none;font-size:20px;color:var(--text-muted);cursor:pointer;padding:4px;line-height:1;}
+.modal-close:hover{color:var(--danger);}
+
+/* ===== TOAST ===== */
+.toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.15);animation:toastIn .3s ease;max-width:300px;}
+.toast.success{background:#27ae60;color:#fff;} .toast.error{background:#e74c3c;color:#fff;}
+.toast.warning{background:#f39c12;color:#fff;} .toast.info{background:#2980b9;color:#fff;}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+
+/* ===== NOTICE BANNER ===== */
+.data-banner{background:linear-gradient(135deg,#fff8e1,#fff3cd);border:1px solid #ffe082;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;}
+.data-banner-icon{font-size:20px;flex-shrink:0;margin-top:1px;}
+.data-banner-body{flex:1;}
+.data-banner-title{font-size:13px;font-weight:700;color:#b8860b;margin-bottom:3px;}
+.data-banner-desc{font-size:12px;color:#8d6e00;line-height:1.6;}
+.data-banner-actions{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ===== RESULT EXPORT ===== */
+.result-export-bar{background:linear-gradient(135deg,#eaf4fb,#d6eaf8);border:1px solid #aed6f1;border-radius:10px;padding:14px 16px;margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.result-export-bar .icon{font-size:22px;}
+.result-export-bar .text{flex:1;font-size:13px;color:var(--info);}
+.result-export-bar .text strong{display:block;font-size:14px;margin-bottom:2px;color:var(--secondary);}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);}
+.empty-icon{font-size:48px;margin-bottom:12px;}
+
+/* ===== HOME SCIENCE CARD ===== */
+.science-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.science-label{width:90px;font-size:13px;color:var(--text-muted);flex-shrink:0;}
+.science-bar-wrap{flex:1;height:28px;background:#f0f0f0;border-radius:6px;overflow:hidden;}
+.science-bar{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-size:12px;color:#fff;font-weight:700;}
+.science-value{width:50px;font-size:14px;font-weight:800;text-align:right;}
+.flow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.flow-step{background:var(--bg);border-radius:10px;padding:14px 10px;text-align:center;border:1.5px solid var(--border);}
+.flow-step-icon{font-size:24px;margin-bottom:8px;}
+.flow-step-num{font-size:10px;font-weight:700;color:var(--primary);margin-bottom:4px;}
+.flow-step-title{font-size:13px;font-weight:700;margin-bottom:4px;}
+.flow-step-desc{font-size:11px;color:var(--text-muted);line-height:1.5;}
+
+/* ===== ANALYSIS ===== */
+.trend-chart{display:flex;align-items:flex-end;gap:6px;height:140px;padding-top:16px;border-bottom:2px solid var(--border);overflow-x:auto;}
+.trend-bar-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:36px;}
+.trend-bar-val{font-size:10px;font-weight:700;}
+.trend-bar-rect{width:100%;max-width:36px;border-radius:4px 4px 0 0;min-height:4px;}
+.trend-bar-name{font-size:9px;color:var(--text-muted);text-align:center;max-width:40px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+
+/* ===== MOBILE ===== */
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col{grid-template-columns:1fr;}
+  .flow-steps{grid-template-columns:repeat(2,1fr);}
+  .exam-answer-wrap{grid-template-columns:1fr;}
+  .sidebar-info-col{display:none;}
+}
+@media(max-width:700px){
+  :root{--sidebar-w:0px;}
+  .sidebar{transform:translateX(-240px);width:240px;}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-overlay.show{display:block;}
+  .main-content{margin-left:0;}
+  .menu-btn{display:flex;}
+  .page-content{padding:14px 14px;}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px;}
+  .stat-card{padding:12px 10px;gap:10px;}
+  .stat-value{font-size:18px;}
+  .topbar{padding:0 14px;height:50px;}
+  .topbar-badge{display:none;}
+  .data-notice{display:none;}
+  .form-grid{grid-template-columns:1fr;}
+  .step-bar{padding:12px 14px;}
+  .step-label{display:none;}
+  .score-circle{width:110px;height:110px;}
+  .score-num{font-size:24px;}
+  .card{padding:14px;}
+  .btn-group{gap:6px;}
+  .voice-btn{width:72px;height:72px;font-size:30px;}
+  .q-text{font-size:14px;}
+  .modal{padding:16px;}
+  .flow-steps{grid-template-columns:repeat(2,1fr);}
+  .bottom-nav{display:flex;}
+  .topbar-title{font-size:14px;}
+  table{min-width:400px;}
+}
+@media(max-width:420px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .stat-card{flex-direction:column;align-items:flex-start;gap:6px;}
+  .btn-lg{padding:12px 18px;font-size:14px;}
+}
+
+/* ===== BOTTOM NAV (mobile) ===== */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:150;height:56px;}
+.bottom-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;font-size:10px;color:var(--text-muted);transition:color .2s;padding:6px 0;}
+.bottom-nav-item .bnav-icon{font-size:20px;line-height:1;}
+.bottom-nav-item.active{color:var(--primary);}
+@media(max-width:700px){.page-content{padding-bottom:70px;}}
+
+/* ===== MISC ===== */
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin{animation:spin 1s linear infinite;}
 </style>
 </head>
 <body>
-<div class="app-container">
-  <nav class="sidebar">
-    <div class="sidebar-logo">
+
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
       <div class="logo-icon">🔥</div>
-      <h2>AI消防安全考核系统</h2>
-      <p>中国移动乌鲁木齐分公司</p>
+      <div class="logo-text">
+        <h2>AI消防安全考核系统</h2>
+        <p>中国移动乌鲁木齐分公司</p>
+      </div>
     </div>
-    <div class="sidebar-nav">
-      <div class="nav-section-title">考核流程</div>
-      <div class="nav-item active" onclick="switchPage('home')" id="nav-home"><span class="nav-icon">🏠</span> 系统首页</div>
-      <div class="nav-item" onclick="switchPage('exam')" id="nav-exam"><span class="nav-icon">📝</span> 开始考核</div>
-      <div class="nav-section-title" style="margin-top:8px;">管理后台</div>
-      <div class="nav-item" onclick="switchPage('qbank')" id="nav-qbank"><span class="nav-icon">📚</span> 题库管理</div>
-      <div class="nav-item" onclick="switchPage('ledger')" id="nav-ledger"><span class="nav-icon">📊</span> 考核台账</div>
-      <div class="nav-item" onclick="switchPage('analysis')" id="nav-analysis"><span class="nav-icon">📈</span> 薄弱分析</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="sidebar-section">考核流程</div>
+    <div class="nav-item active" id="nav-home" onclick="switchPage('home')">
+      <span class="nav-icon">🏠</span><span>系统首页</span>
     </div>
-    <div class="sidebar-footer">v1.0.0 Demo · 基于Dify低代码平台<br>提取练习效应 · AI语义阅卷</div>
-  </nav>
+    <div class="nav-item" id="nav-exam" onclick="switchPage('exam')">
+      <span class="nav-icon">📝</span><span>开始考核</span>
+    </div>
+    <div class="sidebar-section">管理后台</div>
+    <div class="nav-item" id="nav-qbank" onclick="switchPage('qbank')">
+      <span class="nav-icon">📚</span><span>题库管理</span>
+    </div>
+    <div class="nav-item" id="nav-ledger" onclick="switchPage('ledger')">
+      <span class="nav-icon">📋</span><span>考核台账</span>
+    </div>
+    <div class="nav-item" id="nav-analysis" onclick="switchPage('analysis')">
+      <span class="nav-icon">📈</span><span>薄弱分析</span>
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    v2.0 · 基于Dify低代码平台<br>
+    提取练习效应 · AI语义阅卷<br>
+    数据存储于本设备浏览器
+  </div>
+</nav>
 
-  <div class="main-content">
-    <div class="top-bar">
-      <h1 id="page-title">系统首页</h1>
-      <span class="badge" id="page-badge">AI智能考核 · Demo版</span>
+<!-- Main -->
+<div class="main-content">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title" id="page-title">系统首页</div>
+    <div class="data-notice" onclick="showDataModal()" title="了解数据存储说明">
+      ⚠️ 数据本地存储说明
     </div>
-    <div class="page-content">
+    <div class="topbar-badge" id="page-badge">AI智能考核 · Demo版</div>
+  </div>
 
-      <!-- HOME -->
-      <div class="page-section active" id="page-home">
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-icon red">🔥</div><div><div class="stat-value" id="stat-total">0</div><div class="stat-label">累计考核人次</div></div></div>
-          <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value" id="stat-pass-rate">—</div><div class="stat-label">综合通过率</div></div></div>
-          <div class="stat-card"><div class="stat-icon blue">📚</div><div><div class="stat-value" id="stat-qcount">0</div><div class="stat-label">题库总题数</div></div></div>
-          <div class="stat-card"><div class="stat-icon orange">⏱️</div><div><div class="stat-value" id="stat-avg-score">—</div><div class="stat-label">平均得分率</div></div></div>
+  <!-- Page Content -->
+  <div class="page-content">
+
+    <!-- HOME -->
+    <div class="page-section active" id="page-home">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon red">🔥</div>
+          <div><div class="stat-value" id="stat-total">0</div><div class="stat-label">累计考核人次</div></div>
         </div>
-        <div class="two-col">
-          <div class="card">
-            <div class="card-title"><span class="icon">🎯</span>系统简介</div>
-            <div class="info-banner"><span>💡</span><span>本系统基于<strong>认知科学提取练习效应</strong>理论，采用语音口述答题替代传统选择题，通过AI语义阅卷实现智能考核。</span></div>
-            <div style="font-size:13.5px;line-height:1.9;color:var(--text-muted);">
-              <p>✅ <strong>打破传统</strong>：颠覆选择题被动笔试，落地语音口述主动考核</p>
-              <p>✅ <strong>AI阅卷</strong>：语义宽松判分，兼容口语化表达</p>
-              <p>✅ <strong>全流程自动化</strong>：无需人工组卷、阅卷、统计、制表</p>
-              <p>✅ <strong>数据可视化</strong>：自动生成台账、薄弱点分析报告</p>
-            </div>
-            <div style="margin-top:16px;"><button class="btn btn-primary" onclick="switchPage('exam')">🚀 立即开始考核</button></div>
-          </div>
-          <div class="card">
-            <div class="card-title"><span class="icon">🧠</span>科学依据</div>
-            <div style="font-size:13px;line-height:1.8;margin-bottom:14px;color:var(--text-muted);">基于Roediger & Karpicke（2006）权威实验，7日后知识留存率对比：</div>
-            <div class="chart-bar-row"><div class="chart-bar-label">传统选择题</div><div class="chart-bar-wrap"><div class="chart-bar red" style="width:35.8%">35.8%</div></div><div class="chart-bar-value" style="color:var(--primary)">35.8%</div></div>
-            <div class="chart-bar-row"><div class="chart-bar-label">语音口述考核</div><div class="chart-bar-wrap"><div class="chart-bar green" style="width:79.5%">79.5%</div></div><div class="chart-bar-value" style="color:var(--success)">79.5%</div></div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">📊 7日后知识留存率（本系统实测数据）</div>
-            <hr class="divider">
-            <div style="font-size:13px;color:var(--text-muted);"><span class="tag tag-danger" style="margin-right:6px;">虚假合格率 19.2% → 0%</span><span class="tag tag-success">人工工时缩减 87.5%</span></div>
-          </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div><div class="stat-value" id="stat-pass-rate">—</div><div class="stat-label">综合通过率</div></div>
         </div>
-        <div class="card">
-          <div class="card-title"><span class="icon">📋</span>考核流程说明</div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center;">
-            <div style="padding:16px;background:#fff5f5;border-radius:10px;border:1.5px solid var(--primary-light);"><div style="font-size:28px;margin-bottom:8px;">📋</div><div style="font-weight:700;font-size:14px;margin-bottom:4px;">①登记信息</div><div style="font-size:12px;color:var(--text-muted);">填写姓名、工号、部门等基础信息</div></div>
-            <div style="padding:16px;background:#f0fff4;border-radius:10px;border:1.5px solid #a9dfbf;"><div style="font-size:28px;margin-bottom:8px;">🎙️</div><div style="font-weight:700;font-size:14px;margin-bottom:4px;">②语音答题</div><div style="font-size:12px;color:var(--text-muted);">点击麦克风，口述答案或手动输入</div></div>
-            <div style="padding:16px;background:#eaf4fd;border-radius:10px;border:1.5px solid #a9cce3;"><div style="font-size:28px;margin-bottom:8px;">🤖</div><div style="font-weight:700;font-size:14px;margin-bottom:4px;">③AI阅卷</div><div style="font-size:12px;color:var(--text-muted);">语义匹配，宽松判分，输出评分依据</div></div>
-            <div style="padding:16px;background:#fef9e7;border-radius:10px;border:1.5px solid #f9e79f;"><div style="font-size:28px;margin-bottom:8px;">📊</div><div style="font-weight:700;font-size:14px;margin-bottom:4px;">④查看结果</div><div style="font-size:12px;color:var(--text-muted);">详细评分报告，自动归档台账</div></div>
+        <div class="stat-card">
+          <div class="stat-icon blue">📚</div>
+          <div><div class="stat-value" id="stat-qcount">0</div><div class="stat-label">题库总题数</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">🎯</div>
+          <div><div class="stat-value" id="stat-avg-score">—</div><div class="stat-label">平均得分率</div></div>
+        </div>
+      </div>
+
+      <!-- Data Notice Banner -->
+      <div class="data-banner" id="home-data-banner">
+        <div class="data-banner-icon">💾</div>
+        <div class="data-banner-body">
+          <div class="data-banner-title">关于答题记录的说明</div>
+          <div class="data-banner-desc">
+            本系统为<strong>纯前端Demo</strong>，所有考核数据仅保存在<strong>当前设备的浏览器</strong>中（localStorage），<strong>不会自动上传到服务器</strong>。<br>
+            • 考生在自己设备上做完题，管理员<strong>看不到该设备上的数据</strong><br>
+            • 每台设备的台账相互独立，无法自动汇总<br>
+            • 考生做完题后可<strong>截图或导出结果</strong>发送给管理员
+          </div>
+          <div class="data-banner-actions">
+            <button class="btn btn-warning btn-sm" onclick="showDataModal()">📖 了解更多</button>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('home-data-banner').style.display='none'">知道了</button>
           </div>
         </div>
       </div>
 
-      <!-- EXAM -->
-      <div class="page-section" id="page-exam">
-        <div id="exam-step-register">
-          <div class="card">
-            <div class="card-title"><span class="icon">📋</span>考核信息登记</div>
-            <div class="step-indicator">
-              <div class="step active" id="step1"><div class="step-circle">1</div><div class="step-label">信息登记</div></div>
-              <div class="step" id="step2"><div class="step-circle">2</div><div class="step-label">语音答题</div></div>
-              <div class="step" id="step3"><div class="step-circle">3</div><div class="step-label">AI阅卷</div></div>
-              <div class="step" id="step4"><div class="step-circle">4</div><div class="step-label">查看结果</div></div>
-            </div>
-            <div class="info-banner"><span>ℹ️</span><span>本次考核采用<strong>语音口述</strong>答题模式，无需机械背诵标准答案，可使用自然口语表达消防知识点。</span></div>
-            <div class="form-grid">
-              <div class="form-group"><label>姓名 *</label><input type="text" id="reg-name" placeholder="请输入真实姓名"></div>
-              <div class="form-group"><label>工号 *</label><input type="text" id="reg-id" placeholder="请输入工号"></div>
-              <div class="form-group"><label>所属部门 *</label>
-                <select id="reg-dept">
-                  <option value="">请选择部门</option>
-                  <option>综合部</option><option>开发区综合部</option><option>市场部</option>
-                  <option>政企部</option><option>网络部</option><option>一线网格</option><option>区县集团组</option>
-                </select>
-              </div>
-              <div class="form-group"><label>岗位类型 *</label>
-                <select id="reg-job">
-                  <option value="">请选择岗位</option>
-                  <option>消防巡检</option><option>行政管理</option><option>运维支撑</option>
-                  <option>网络工程</option><option>市场营销</option><option>其他</option>
-                </select>
-              </div>
-              <div class="form-group"><label>考核题数</label>
-                <select id="reg-qcount">
-                  <option value="3">3题（快速考核）</option>
-                  <option value="5" selected>5题（标准考核）</option>
-                  <option value="8">8题（强化考核）</option>
-                </select>
-              </div>
-              <div class="form-group"><label>每题答题时限（秒）</label>
-                <select id="reg-timelimit">
-                  <option value="60">60秒</option>
-                  <option value="90" selected>90秒</option>
-                  <option value="120">120秒</option>
-                  <option value="0">不限时</option>
-                </select>
-              </div>
-            </div>
-            <div style="margin-top:20px;"><button class="btn btn-primary btn-lg" onclick="startExam()">确认信息，进入考核 →</button></div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title"><span class="icon">🎯</span>系统简介</div>
+          <div style="background:linear-gradient(135deg,#fff8e1,#fff3cd);border-left:4px solid var(--warning);padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.8;margin-bottom:14px;">
+            ⚡ 本系统基于<strong>认知科学提取练习效应</strong>理论，采用语音口述答题代替传统选择题，通过AI语义阅卷实现智能考核。
+          </div>
+          <div style="font-size:13px;line-height:2;">
+            <div>✅ <strong>打破传统：</strong>颠覆选择题被动笔试，落地语音口述主动考核</div>
+            <div>✅ <strong>AI阅卷：</strong>语义宽松判分，兼容口语化表达</div>
+            <div>✅ <strong>全流程自动化：</strong>无需人工组卷、阅卷、统计、制表</div>
+            <div>✅ <strong>数据可视化：</strong>自动生成台账、薄弱点分析报告</div>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-primary btn-lg" onclick="switchPage('exam')">🚀 立即开始考核</button>
           </div>
         </div>
-
-        <div id="exam-step-answer" style="display:none;">
-          <div style="display:grid;grid-template-columns:1fr 260px;gap:20px;">
-            <div>
-              <div class="card" style="padding:18px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                  <div style="font-size:14px;font-weight:700;">第 <span id="cur-q-num">1</span> 题 / 共 <span id="total-q-num">5</span> 题</div>
-                  <div class="timer-display" id="exam-timer">01:30</div>
-                </div>
-                <div class="progress-bar-wrap" style="margin-bottom:18px;"><div class="progress-bar red" id="exam-progress" style="width:20%"></div></div>
-                <div class="question-nav" id="q-nav"></div>
-                <div class="question-box">
-                  <div class="question-meta"><span id="q-category-tag"></span><span>难度：<strong id="q-difficulty">中等</strong></span></div>
-                  <div class="question-text" id="q-text">加载中...</div>
-                  <div class="question-hint" id="q-hint"></div>
-                </div>
-                <div class="voice-btn-wrap">
-                  <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">🎙️</button>
-                  <div class="voice-label">点击麦克风开始/停止录音</div>
-                  <div class="voice-status" id="voice-status"></div>
-                </div>
-                <div style="margin-bottom:14px;">
-                  <label style="margin-bottom:6px;display:block;">📝 已识别/输入内容（可直接编辑）：</label>
-                  <textarea id="answer-text" rows="3" placeholder="语音识别内容将显示在此处，也可直接手动输入答案..."></textarea>
-                </div>
-                <div class="btn-group">
-                  <button class="btn btn-secondary" onclick="skipQuestion()">跳过此题 →</button>
-                  <button class="btn btn-success" onclick="confirmAnswer()">✅ 确认答案，下一题</button>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div class="card" style="padding:16px;">
-                <div class="card-title" style="font-size:13px;"><span>👤</span>考生信息</div>
-                <div style="font-size:13px;line-height:2;color:var(--text-muted);">
-                  <div>姓名：<strong id="info-name" style="color:var(--text)">—</strong></div>
-                  <div>工号：<strong id="info-id" style="color:var(--text)">—</strong></div>
-                  <div>部门：<strong id="info-dept" style="color:var(--text)">—</strong></div>
-                  <div>岗位：<strong id="info-job" style="color:var(--text)">—</strong></div>
-                </div>
-              </div>
-              <div class="card" style="padding:16px;margin-top:16px;">
-                <div class="card-title" style="font-size:13px;"><span>💡</span>答题提示</div>
-                <div style="font-size:12px;color:var(--text-muted);line-height:1.8;">
-                  <p>• 请<strong>用自然语言</strong>口述或输入答案</p>
-                  <p>• 无需背诵标准答案，意思正确即可</p>
-                  <p>• AI会识别口语化表达</p>
-                  <p>• 如"总闸拉下来"等同于"切断电源"</p>
-                </div>
-              </div>
-              <div class="card" style="padding:16px;margin-top:16px;">
-                <div class="card-title" style="font-size:13px;"><span>📋</span>作答进度</div>
-                <div id="answer-progress-list" style="font-size:12px;"></div>
-              </div>
-            </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">🧠</span>科学依据</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">基于 Roediger &amp; Karpicke（2006）权威实验，7日后知识留存率对比：</div>
+          <div class="science-row">
+            <div class="science-label">传统选择题</div>
+            <div class="science-bar-wrap"><div class="science-bar" style="width:35.8%;background:#e74c3c;">35.8%</div></div>
+            <div class="science-value" style="color:var(--danger);">35.8%</div>
           </div>
-        </div>
-
-        <div id="exam-step-grading" style="display:none;">
-          <div class="card" style="text-align:center;padding:40px;">
-            <div style="font-size:60px;margin-bottom:16px;animation:pulse 1s ease infinite;">🤖</div>
-            <div style="font-size:18px;font-weight:700;margin-bottom:8px;">AI正在智能阅卷中...</div>
-            <div style="font-size:14px;color:var(--text-muted);margin-bottom:20px;">正在进行语义解析与评分点匹配</div>
-            <div class="progress-bar-wrap" style="max-width:400px;margin:0 auto;height:12px;"><div class="progress-bar blue" id="grading-bar" style="width:0%;transition:width 0.5s;"></div></div>
-            <div style="font-size:13px;color:var(--info);margin-top:12px;" id="grading-status">初始化语义引擎...</div>
+          <div class="science-row">
+            <div class="science-label">语音口述考核</div>
+            <div class="science-bar-wrap"><div class="science-bar" style="width:79.5%;background:var(--success);">79.5%</div></div>
+            <div class="science-value" style="color:var(--success);">79.5%</div>
           </div>
-        </div>
-
-        <div id="exam-step-result" style="display:none;">
-          <div class="card">
-            <div class="card-title"><span class="icon">🏆</span>考核结果</div>
-            <div style="text-align:center;margin-bottom:24px;">
-              <div class="score-circle" id="result-circle"><div class="score-num" id="result-score">—</div><div class="score-text" id="result-status">—</div></div>
-              <div style="font-size:14px;color:var(--text-muted);margin-bottom:8px;" id="result-summary"></div>
-              <div id="result-tags" style="margin-bottom:16px;"></div>
-            </div>
-            <hr class="divider">
-            <div class="card-title" style="margin-top:0;"><span>📋</span>逐题阅卷详情</div>
-            <div id="grading-details"></div>
-            <div style="margin-top:20px;" class="btn-group">
-              <button class="btn btn-primary" onclick="retakeExam()">🔄 重新考核</button>
-              <button class="btn btn-secondary" onclick="switchPage('ledger')">📊 查看台账</button>
-            </div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="tag tag-danger">虚假合格率 19.2% → 0%</span>
+            <span class="tag tag-success">人工工时缩减 87.5%</span>
           </div>
         </div>
       </div>
 
-      <!-- QUESTION BANK -->
-      <div class="page-section" id="page-qbank">
+      <div class="card">
+        <div class="card-title"><span class="icon">📋</span>考核流程说明</div>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-icon">📋</div>
+            <div class="flow-step-num">① 登记信息</div>
+            <div class="flow-step-title">填写基础信息</div>
+            <div class="flow-step-desc">填写姓名、工号、部门等基础信息</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-icon">🎙️</div>
+            <div class="flow-step-num">② 语音答题</div>
+            <div class="flow-step-title">口述或输入</div>
+            <div class="flow-step-desc">点击麦克风口述答案，或直接手动输入</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-icon">🤖</div>
+            <div class="flow-step-num">③ AI阅卷</div>
+            <div class="flow-step-title">智能语义评分</div>
+            <div class="flow-step-desc">语义匹配，宽松判分，输出评分依据</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-icon">📊</div>
+            <div class="flow-step-num">④ 查看结果</div>
+            <div class="flow-step-title">详细评分报告</div>
+            <div class="flow-step-desc">详细评分报告，自动归档台账</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXAM -->
+    <div class="page-section" id="page-exam">
+      <!-- Step Bar -->
+      <div class="step-bar">
+        <div class="step active" id="step1">
+          <div class="step-circle">1</div>
+          <div class="step-label">登记信息</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step2">
+          <div class="step-circle">2</div>
+          <div class="step-label">语音答题</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step3">
+          <div class="step-circle">3</div>
+          <div class="step-label">AI阅卷</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step4">
+          <div class="step-circle">4</div>
+          <div class="step-label">查看结果</div>
+        </div>
+      </div>
+
+      <!-- Step 1: Register -->
+      <div id="exam-step-register">
         <div class="card">
-          <div class="card-title"><span class="icon">📚</span>题库管理</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
-            <div class="btn-group">
-              <button class="btn btn-primary" onclick="showAddQuestionModal()">➕ 新增题目</button>
-              <button class="btn btn-info" onclick="importSampleQuestions()">📥 导入示例题库</button>
-              <button class="btn btn-secondary" onclick="exportQuestions()">📤 导出题库</button>
+          <div class="card-title"><span class="icon">📋</span>考生信息登记</div>
+          <div class="form-grid" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label>姓名 *</label>
+              <input type="text" id="reg-name" placeholder="请输入真实姓名" maxlength="20">
             </div>
-            <div style="display:flex;gap:10px;align-items:center;">
-              <select id="qbank-filter" onchange="renderQBank()" style="width:120px;padding:8px 10px;font-size:13px;">
-                <option value="">全部分类</option>
-                <option>灭火器</option><option>火灾报警</option><option>疏散逃生</option><option>日常巡检</option><option>应急处置</option>
+            <div class="form-group">
+              <label>工号 *</label>
+              <input type="text" id="reg-id" placeholder="请输入工号" maxlength="20">
+            </div>
+            <div class="form-group">
+              <label>所属部门 *</label>
+              <select id="reg-dept">
+                <option value="">请选择部门</option>
+                <option>开发区综合部</option>
+                <option>市场部</option>
+                <option>政企部</option>
+                <option>网络部</option>
+                <option>一线网格</option>
+                <option>区县集团组</option>
+                <option>其他部门</option>
               </select>
-              <input type="text" id="qbank-search" placeholder="搜索题目..." oninput="renderQBank()" style="width:180px;padding:8px 12px;font-size:13px;">
             </div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th style="width:40px;">#</th><th style="width:80px;">分类</th><th>题目内容</th><th>核心评分点</th><th style="width:70px;">难度</th><th style="width:100px;">操作</th></tr></thead>
-              <tbody id="qbank-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">题库为空，请导入示例题库或新增题目</td></tr></tbody>
-            </table>
-          </div>
-          <div style="margin-top:12px;font-size:12px;color:var(--text-muted);" id="qbank-count">共 0 道题目</div>
-        </div>
-      </div>
-
-      <!-- LEDGER -->
-      <div class="page-section" id="page-ledger">
-        <div class="card">
-          <div class="card-title"><span class="icon">📊</span>考核台账</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
-            <div class="btn-group">
-              <button class="btn btn-success" onclick="exportLedger()">📥 导出CSV</button>
-              <button class="btn btn-danger btn-sm" onclick="clearLedger()">🗑️ 清空台账</button>
-            </div>
-            <div style="display:flex;gap:10px;align-items:center;">
-              <select id="ledger-filter" onchange="renderLedger()" style="width:110px;padding:8px 10px;font-size:13px;">
-                <option value="">全部结果</option><option value="pass">通过</option><option value="fail">未通过</option>
+            <div class="form-group">
+              <label>岗位类型 *</label>
+              <select id="reg-job">
+                <option value="">请选择岗位</option>
+                <option>消防巡检</option>
+                <option>行政管理</option>
+                <option>运维支撑</option>
+                <option>市场营销</option>
+                <option>技术开发</option>
+                <option>其他岗位</option>
               </select>
-              <input type="text" id="ledger-search" placeholder="搜索姓名/工号..." oninput="renderLedger()" style="width:160px;padding:8px 12px;font-size:13px;">
+            </div>
+            <div class="form-group">
+              <label>考核题数</label>
+              <select id="reg-qcount">
+                <option value="3">3题（快速考核）</option>
+                <option value="5" selected>5题（标准考核）</option>
+                <option value="8">8题（全量考核）</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>每题时限</label>
+              <select id="reg-timelimit">
+                <option value="0">不限时</option>
+                <option value="60">60秒/题</option>
+                <option value="90" selected>90秒/题</option>
+                <option value="120">120秒/题</option>
+              </select>
             </div>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>#</th><th>姓名</th><th>工号</th><th>部门</th><th>岗位</th><th>考核时间</th><th>题数</th><th>得分率</th><th>结果</th><th>操作</th></tr></thead>
-              <tbody id="ledger-tbody"><tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-muted);">暂无考核记录</td></tr></tbody>
-            </table>
+          <div style="background:#eaf4fb;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--info);margin-bottom:16px;line-height:1.8;">
+            💡 <strong>答题提示：</strong>本次考核采用语音口述模式，说出答案即可，无需背诵标准答案，AI会智能识别口语化表达。如"把总闸拉下来"等同于"切断电源"。
           </div>
-          <div style="margin-top:12px;font-size:12px;color:var(--text-muted);" id="ledger-count">共 0 条记录</div>
+          <div class="btn-group">
+            <button class="btn btn-primary btn-lg" onclick="startExam()">🚀 开始考核</button>
+            <button class="btn btn-info btn-sm" onclick="importSampleQuestions();showToast('示例题库已加载','success')">📥 加载示例题库</button>
+          </div>
         </div>
       </div>
 
-      <!-- ANALYSIS -->
-      <div class="page-section" id="page-analysis">
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-icon red">📊</div><div><div class="stat-value" id="an-total">0</div><div class="stat-label">总考核次数</div></div></div>
-          <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value" id="an-pass-rate">—</div><div class="stat-label">通过率</div></div></div>
-          <div class="stat-card"><div class="stat-icon blue">🎯</div><div><div class="stat-value" id="an-avg">—</div><div class="stat-label">平均得分率</div></div></div>
-          <div class="stat-card"><div class="stat-icon orange">⚠️</div><div><div class="stat-value" id="an-weak">—</div><div class="stat-label">最薄弱知识点</div></div></div>
+      <!-- Step 2: Answer -->
+      <div id="exam-step-answer" style="display:none;">
+        <!-- Progress & Timer Row -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:150px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:4px;">
+              <span>答题进度</span>
+              <span>第 <strong id="cur-q-num">1</strong> / <strong id="total-q-num">5</strong> 题</span>
+            </div>
+            <div class="progress-bar-wrap" style="height:10px;">
+              <div class="progress-bar blue" id="exam-progress" style="width:20%;"></div>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:10px;color:var(--text-muted);">剩余时间</div>
+            <div class="timer-display" id="exam-timer">∞</div>
+          </div>
         </div>
-        <div class="two-col">
-          <div class="card"><div class="card-title"><span class="icon">⚠️</span>知识点薄弱排行</div><div id="weak-chart"></div></div>
-          <div class="card"><div class="card-title"><span class="icon">📈</span>分类通过率分析</div><div id="category-chart"></div></div>
+
+        <div class="exam-answer-wrap">
+          <!-- Main Question Area -->
+          <div>
+            <div class="card">
+              <div class="q-header">
+                <div class="q-num">第 <strong id="cur-q-num2">1</strong> 题</div>
+                <div class="q-tags">
+                  <span id="q-category-tag"></span>
+                  <span class="tag tag-gray" id="q-difficulty">中等</span>
+                </div>
+              </div>
+              <div class="q-text" id="q-text">题目加载中...</div>
+              <div class="q-hint" id="q-hint" style="display:none;"></div>
+
+              <!-- Voice Area -->
+              <div class="voice-area">
+                <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">🎙️</button>
+                <div class="voice-label">点击麦克风开始 / 停止录音</div>
+                <div class="voice-status" id="voice-status"></div>
+              </div>
+
+              <div class="answer-area">
+                <label>📝 已识别 / 输入内容（可直接编辑）：</label>
+                <textarea id="answer-text" rows="4" placeholder="语音识别内容将显示在此处，也可直接手动输入答案..."></textarea>
+              </div>
+
+              <div class="btn-group" style="margin-top:12px;">
+                <button class="btn btn-secondary" onclick="skipQuestion()">跳过此题 →</button>
+                <button class="btn btn-success" onclick="confirmAnswer()">✅ 确认答案，下一题</button>
+                <button class="btn btn-primary" onclick="submitExamConfirm()" style="margin-left:auto;">提交全部 🏁</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Panel (hidden on mobile via CSS) -->
+          <div class="sidebar-info-col">
+            <div class="card" style="padding:14px;">
+              <div class="card-title" style="font-size:13px;margin-bottom:10px;"><span>👤</span>考生信息</div>
+              <div style="font-size:13px;line-height:2.2;">
+                <div>姓名：<strong id="info-name">—</strong></div>
+                <div>工号：<strong id="info-id">—</strong></div>
+                <div>部门：<strong id="info-dept">—</strong></div>
+                <div>岗位：<strong id="info-job">—</strong></div>
+              </div>
+            </div>
+            <div class="card" style="padding:14px;margin-top:0;">
+              <div class="card-title" style="font-size:13px;margin-bottom:10px;"><span>🗂️</span>题目导航</div>
+              <div class="q-nav-grid" id="q-nav"></div>
+              <div style="margin-top:10px;font-size:11px;color:var(--text-muted);line-height:1.8;">
+                <span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--success);display:inline-block;"></span>已答</span>
+                <span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--warning);display:inline-block;"></span>已跳</span>
+                <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--primary);display:inline-block;"></span>当前</span>
+              </div>
+            </div>
+            <div class="card" style="padding:14px;margin-top:0;">
+              <div class="card-title" style="font-size:13px;margin-bottom:8px;"><span>💡</span>答题提示</div>
+              <div style="font-size:12px;color:var(--text-muted);line-height:1.8;">
+                <p>• 用<strong>自然语言</strong>口述答案</p>
+                <p>• 意思正确即可，无需死记硬背</p>
+                <p>• AI识别口语化表达</p>
+                <p>• 如"总闸拉下来"="切断电源"</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="card"><div class="card-title"><span class="icon">📉</span>近期考核得分趋势（最近10次）</div><div id="score-trend"></div></div>
+      </div>
+
+      <!-- Step 3: Grading -->
+      <div id="exam-step-grading" style="display:none;">
+        <div class="card" style="text-align:center;padding:50px 20px;">
+          <div style="font-size:64px;margin-bottom:16px;animation:pulse 1s ease infinite;">🤖</div>
+          <div style="font-size:20px;font-weight:800;margin-bottom:8px;">AI正在智能阅卷中...</div>
+          <div style="font-size:14px;color:var(--text-muted);margin-bottom:24px;">正在进行语义解析与评分点匹配，请稍候</div>
+          <div class="progress-bar-wrap" style="max-width:420px;margin:0 auto;height:14px;border-radius:7px;">
+            <div class="progress-bar blue" id="grading-bar" style="width:0%;transition:width .5s;"></div>
+          </div>
+          <div style="font-size:13px;color:var(--info);margin-top:14px;font-weight:600;" id="grading-status">初始化语义引擎...</div>
+        </div>
+      </div>
+
+      <!-- Step 4: Result -->
+      <div id="exam-step-result" style="display:none;">
         <div class="card">
-          <div class="card-title"><span class="icon">🏢</span>部门考核汇总</div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>部门</th><th>考核人次</th><th>通过人次</th><th>通过率</th><th>平均得分</th></tr></thead>
-              <tbody id="dept-tbody"></tbody>
-            </table>
+          <div class="card-title"><span class="icon">🏆</span>考核结果</div>
+          <div style="text-align:center;margin-bottom:24px;">
+            <div class="score-circle" id="result-circle">
+              <div class="score-num" id="result-score">—</div>
+              <div class="score-text" id="result-status">—</div>
+            </div>
+            <div style="font-size:14px;color:var(--text-muted);margin-bottom:8px;" id="result-summary"></div>
+            <div id="result-tags" style="margin-bottom:8px;"></div>
+          </div>
+
+          <!-- Export / Share bar -->
+          <div class="result-export-bar" id="result-export-bar">
+            <span class="icon">📤</span>
+            <div class="text">
+              <strong>⚠️ 数据仅存本设备 — 请将结果发给管理员</strong>
+              您的考核结果仅保存在本设备，管理员无法自动看到。请截图或导出文字结果发送给管理员。
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-info btn-sm" onclick="exportResultText()">📋 复制结果文字</button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('请使用手机截图功能截图后发送给管理员','info')">📸 截图提示</button>
+            </div>
+          </div>
+
+          <hr class="divider">
+          <div class="card-title" style="margin-top:0;"><span>📋</span>逐题阅卷详情</div>
+          <div id="grading-details"></div>
+          <div style="margin-top:20px;" class="btn-group">
+            <button class="btn btn-primary" onclick="retakeExam()">🔄 重新考核</button>
+            <button class="btn btn-secondary" onclick="switchPage('ledger')">📊 查看台账</button>
           </div>
         </div>
       </div>
+    </div>
 
+    <!-- QUESTION BANK -->
+    <div class="page-section" id="page-qbank">
+      <!-- Data notice for admin -->
+      <div class="data-banner" style="margin-bottom:14px;">
+        <div class="data-banner-icon">⚠️</div>
+        <div class="data-banner-body">
+          <div class="data-banner-title">管理员注意：题库是本地存储</div>
+          <div class="data-banner-desc">题库数据保存在<strong>当前浏览器</strong>中。若更换设备或清空浏览器数据，题库会丢失。建议定期导出题库CSV备份，或在固定管理设备上维护题库。</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📚</span>题库管理</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="showAddQuestionModal()">➕ 新增题目</button>
+            <button class="btn btn-info" onclick="importSampleQuestions()">📥 导入示例题库</button>
+            <button class="btn btn-secondary" onclick="exportQuestions()">📤 导出题库</button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select id="qbank-filter" onchange="renderQBank()" style="width:110px;padding:8px 10px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;">
+              <option value="">全部分类</option>
+              <option>灭火器</option><option>火灾报警</option><option>疏散逃生</option><option>日常巡检</option><option>应急处置</option>
+            </select>
+            <input type="text" id="qbank-search" placeholder="搜索题目..." oninput="renderQBank()" style="width:160px;padding:8px 12px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>分类</th><th>题目内容</th><th>核心评分点</th><th>难度</th><th>操作</th></tr></thead>
+            <tbody id="qbank-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">题库为空，请导入示例题库或新增题目</td></tr></tbody>
+          </table>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text-muted);" id="qbank-count">共 0 道题目</div>
+      </div>
+    </div>
+
+    <!-- LEDGER -->
+    <div class="page-section" id="page-ledger">
+      <!-- Data notice -->
+      <div class="data-banner" style="margin-bottom:14px;">
+        <div class="data-banner-icon">⚠️</div>
+        <div class="data-banner-body">
+          <div class="data-banner-title">台账数据说明：仅含本设备记录</div>
+          <div class="data-banner-desc">
+            此台账只显示<strong>在本设备本浏览器上完成的考核记录</strong>。其他设备上的考核数据需由考生截图或导出后手动汇报给管理员。<br>
+            如需集中收集所有人数据，请参考"了解更多"中的解决方案。
+          </div>
+          <div class="data-banner-actions">
+            <button class="btn btn-warning btn-sm" onclick="showDataModal()">📖 集中收集数据的方案</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon">📋</span>考核台账</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+          <div class="btn-group">
+            <button class="btn btn-success" onclick="exportLedger()">📥 导出CSV</button>
+            <button class="btn btn-danger btn-sm" onclick="clearLedger()">🗑️ 清空台账</button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select id="ledger-filter" onchange="renderLedger()" style="width:100px;padding:8px 10px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;">
+              <option value="">全部结果</option><option value="pass">通过</option><option value="fail">未通过</option>
+            </select>
+            <input type="text" id="ledger-search" placeholder="搜索姓名/工号..." oninput="renderLedger()" style="width:150px;padding:8px 12px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>姓名</th><th>工号</th><th>部门</th><th>岗位</th><th>考核时间</th><th>题数</th><th>得分率</th><th>结果</th><th>操作</th></tr></thead>
+            <tbody id="ledger-tbody"><tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-muted);">暂无考核记录</td></tr></tbody>
+          </table>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text-muted);" id="ledger-count">共 0 条记录</div>
+      </div>
+    </div>
+
+    <!-- ANALYSIS -->
+    <div class="page-section" id="page-analysis">
+      <div class="data-banner" style="margin-bottom:14px;">
+        <div class="data-banner-icon">📊</div>
+        <div class="data-banner-body">
+          <div class="data-banner-title">分析数据仅基于本设备记录</div>
+          <div class="data-banner-desc">以下统计数据仅包含在本设备上完成的考核记录，如需全员数据分析，需汇总各设备导出的CSV后另行统计。</div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon red">📊</div><div><div class="stat-value" id="an-total">0</div><div class="stat-label">总考核次数</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-value" id="an-pass-rate">—</div><div class="stat-label">通过率</div></div></div>
+        <div class="stat-card"><div class="stat-icon blue">🎯</div><div><div class="stat-value" id="an-avg">—</div><div class="stat-label">平均得分率</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange">⚠️</div><div><div class="stat-value" id="an-weak" style="font-size:16px;">—</div><div class="stat-label">最薄弱知识点</div></div></div>
+      </div>
+      <div class="two-col">
+        <div class="card"><div class="card-title"><span class="icon">⚠️</span>知识点薄弱排行（失分率）</div><div id="weak-chart"></div></div>
+        <div class="card"><div class="card-title"><span class="icon">📈</span>分类通过率分析</div><div id="category-chart"></div></div>
+      </div>
+      <div class="card"><div class="card-title"><span class="icon">📉</span>近期考核得分趋势（最近10次）</div><div id="score-trend"></div></div>
+      <div class="card">
+        <div class="card-title"><span class="icon">🏢</span>部门考核汇总</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>部门</th><th>考核人次</th><th>通过人次</th><th>通过率</th><th>平均得分</th></tr></thead>
+            <tbody id="dept-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main-content -->
+
+<!-- Bottom Nav (mobile) -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-item active" id="bnav-home" onclick="switchPage('home')">
+    <span class="bnav-icon">🏠</span>首页
+  </div>
+  <div class="bottom-nav-item" id="bnav-exam" onclick="switchPage('exam')">
+    <span class="bnav-icon">📝</span>考核
+  </div>
+  <div class="bottom-nav-item" id="bnav-qbank" onclick="switchPage('qbank')">
+    <span class="bnav-icon">📚</span>题库
+  </div>
+  <div class="bottom-nav-item" id="bnav-ledger" onclick="switchPage('ledger')">
+    <span class="bnav-icon">📋</span>台账
+  </div>
+  <div class="bottom-nav-item" id="bnav-analysis" onclick="switchPage('analysis')">
+    <span class="bnav-icon">📈</span>分析
+  </div>
+</nav>
+
+<!-- Modal: Data Explanation -->
+<div class="modal-overlay" id="modal-data">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-title">💾 数据存储说明 &amp; 解决方案<button class="modal-close" onclick="closeModal('modal-data')">✕</button></div>
+    <div style="font-size:13px;line-height:1.8;color:var(--text);">
+      <div style="background:#fff8e1;border-radius:8px;padding:12px 14px;margin-bottom:14px;border-left:4px solid var(--warning);">
+        <strong>⚠️ 当前版本（纯前端Demo）的数据逻辑：</strong><br>
+        所有数据存在各自设备的 <code>localStorage</code>（浏览器本地存储）中，不联网、不上传、各设备相互独立。
+      </div>
+      <strong>📋 当前 Demo 阶段的数据收集方案：</strong>
+      <ol style="margin:10px 0 10px 20px;line-height:2.2;">
+        <li>考生做完考核后，点击结果页的 <strong>「复制结果文字」</strong> 按钮</li>
+        <li>将复制的文字通过企业微信、钉钉等发给管理员</li>
+        <li>或考生截图结果页发送给管理员</li>
+        <li>管理员也可在管理员设备上打开台账导出 CSV（仅含该设备数据）</li>
+      </ol>
+      <hr class="divider">
+      <strong>🚀 完整版（后续迁移）的解决方案：</strong>
+      <div style="background:#eaf4fb;border-radius:8px;padding:12px 14px;margin-top:10px;line-height:2;">
+        按照论文规划，后续将从 Dify 原型迁移至<strong>中国移动聚智智能体平台/灵境平台</strong>内网部署：<br>
+        ✅ 内网数据库统一存储所有考核记录<br>
+        ✅ 管理员可实时查看全员考核数据<br>
+        ✅ 自动汇总、自动预警、自动推送报告<br>
+        ✅ 满足国企数据安全合规要求<br>
+        ✅ 对接公司内部认证体系（一键登录）
+      </div>
+      <hr class="divider">
+      <div style="font-size:12px;color:var(--text-muted);">
+        当前 Demo 的定位是：<strong>原型验证 + 功能展示</strong>，已完整验证所有核心功能可行性，为后续正式部署提供参照。
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="closeModal('modal-data')">知道了</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Add/Edit Question -->
+<!-- Modal: Add/Edit Question -->
 <div class="modal-overlay" id="modal-question">
   <div class="modal">
     <div class="modal-title"><span id="modal-q-title">新增考核题目</span><button class="modal-close" onclick="closeModal('modal-question')">✕</button></div>
-    <div class="form-group" style="margin-bottom:14px;"><label>题目内容 *</label><textarea id="mq-text" rows="3" placeholder="请输入题目内容，例如：请简述灭火器的日常检查要点"></textarea></div>
-    <div class="form-grid" style="margin-bottom:14px;">
+    <div class="form-group" style="margin-bottom:12px;"><label>题目内容 *</label><textarea id="mq-text" rows="3" placeholder="请输入题目内容，例如：请简述灭火器的日常检查要点"></textarea></div>
+    <div class="form-grid" style="margin-bottom:12px;">
       <div class="form-group"><label>分类</label><select id="mq-category"><option>灭火器</option><option>火灾报警</option><option>疏散逃生</option><option>日常巡检</option><option>应急处置</option></select></div>
       <div class="form-group"><label>难度</label><select id="mq-difficulty"><option>简单</option><option selected>中等</option><option>困难</option></select></div>
     </div>
-    <div class="form-group" style="margin-bottom:14px;"><label>核心评分点（每行一个，关键词用分号;分隔，AI会语义匹配）</label><textarea id="mq-points" rows="4" placeholder="例如：&#10;压力表;气压表;指针;绿区&#10;瓶体;罐子;锈蚀;损坏&#10;喷管;管子;堵塞&#10;保险销;铅封;插销"></textarea></div>
-    <div class="form-group" style="margin-bottom:14px;"><label>答题提示（可选）</label><input type="text" id="mq-hint" placeholder="例如：请从外观、压力、配件等方面回答"></div>
-    <div class="form-group" style="margin-bottom:20px;"><label>参考答案（展示用，不作评分依据）</label><textarea id="mq-answer" rows="3" placeholder="填写标准参考答案..."></textarea></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>核心评分点（每行一个，关键词用分号 ; 分隔，AI会语义匹配）</label><textarea id="mq-points" rows="4" placeholder="例如：&#10;压力表;气压表;指针;绿区&#10;瓶体;罐子;锈蚀&#10;喷管;管子;堵塞&#10;保险销;铅封;插销"></textarea></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>答题提示（可选）</label><input type="text" id="mq-hint" placeholder="例如：请从外观、压力、配件等方面回答"></div>
+    <div class="form-group" style="margin-bottom:18px;"><label>参考答案（展示用）</label><textarea id="mq-answer" rows="3" placeholder="填写标准参考答案..."></textarea></div>
     <div class="btn-group">
       <button class="btn btn-primary" onclick="saveQuestion()">💾 保存题目</button>
       <button class="btn btn-secondary" onclick="closeModal('modal-question')">取消</button>
@@ -472,9 +865,9 @@
   </div>
 </div>
 
-<!-- MODAL: Ledger Detail -->
+<!-- Modal: Ledger Detail -->
 <div class="modal-overlay" id="modal-ledger-detail">
-  <div class="modal" style="max-width:680px;">
+  <div class="modal" style="max-width:660px;">
     <div class="modal-title"><span>考核详情</span><button class="modal-close" onclick="closeModal('modal-ledger-detail')">✕</button></div>
     <div id="ledger-detail-content"></div>
   </div>
@@ -488,35 +881,57 @@ var store = { questions: [], records: [], editingQId: null };
 var exam = { user: {}, questions: [], answers: [], currentQ: 0, timerInterval: null, timeLeft: 90, recognition: null, isRecording: false, timeLimit: 90 };
 
 function init() {
-  var saved = localStorage.getItem('fire_safety_store');
+  var saved = localStorage.getItem('fire_safety_store_v2');
   if (saved) { try { var s = JSON.parse(saved); store.questions = s.questions||[]; store.records = s.records||[]; } catch(e){} }
+  // Migrate from v1 key
+  if (store.questions.length === 0) {
+    var old = localStorage.getItem('fire_safety_store');
+    if (old) { try { var s2 = JSON.parse(old); store.questions = s2.questions||[]; store.records = s2.records||[]; saveStore(); } catch(e){} }
+  }
   updateHomeStats();
 }
 
 function saveStore() {
-  localStorage.setItem('fire_safety_store', JSON.stringify({questions:store.questions, records:store.records}));
+  localStorage.setItem('fire_safety_store_v2', JSON.stringify({questions:store.questions, records:store.records}));
 }
 
 // ===================== NAVIGATION =====================
 var pageTitles = {
-  home: ['系统首页','AI智能考核 · Demo版'],
-  exam: ['开始考核','消防安全知识考核'],
-  qbank: ['题库管理','题目管理与维护'],
-  ledger: ['考核台账','历史记录与数据归档'],
-  analysis: ['薄弱分析','知识点统计与趋势分析']
+  home:['系统首页','AI智能考核 · Demo版'],
+  exam:['开始考核','消防安全知识考核'],
+  qbank:['题库管理','题目管理与维护'],
+  ledger:['考核台账','历史记录与数据归档'],
+  analysis:['薄弱分析','知识点统计与趋势分析']
 };
 
 function switchPage(page) {
   document.querySelectorAll('.page-section').forEach(function(el){ el.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  document.querySelectorAll('.bottom-nav-item').forEach(function(el){ el.classList.remove('active'); });
   document.getElementById('page-'+page).classList.add('active');
   document.getElementById('nav-'+page).classList.add('active');
+  var bn = document.getElementById('bnav-'+page);
+  if (bn) bn.classList.add('active');
   document.getElementById('page-title').textContent = pageTitles[page][0];
   document.getElementById('page-badge').textContent = pageTitles[page][1];
   if (page==='qbank') renderQBank();
   if (page==='ledger') renderLedger();
   if (page==='analysis') renderAnalysis();
   if (page==='home') updateHomeStats();
+  closeSidebar();
+  window.scrollTo(0,0);
+}
+
+// ===================== SIDEBAR MOBILE =====================
+function toggleSidebar() {
+  var sb = document.getElementById('sidebar');
+  var ov = document.getElementById('sidebar-overlay');
+  if (sb.classList.contains('open')) { sb.classList.remove('open'); ov.classList.remove('show'); }
+  else { sb.classList.add('open'); ov.classList.add('show'); }
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
 }
 
 // ===================== HOME =====================
@@ -535,13 +950,18 @@ function updateHomeStats() {
   }
 }
 
+function showDataModal() { document.getElementById('modal-data').classList.add('show'); }
+
 // ===================== EXAM =====================
 function startExam() {
   var name = document.getElementById('reg-name').value.trim();
   var id = document.getElementById('reg-id').value.trim();
   var dept = document.getElementById('reg-dept').value;
   var job = document.getElementById('reg-job').value;
-  if (!name||!id||!dept||!job) { showToast('请填写完整的考生信息','error'); return; }
+  if (!name) { showToast('请填写姓名','error'); return; }
+  if (!id) { showToast('请填写工号','error'); return; }
+  if (!dept) { showToast('请选择所属部门','error'); return; }
+  if (!job) { showToast('请选择岗位类型','error'); return; }
   if (store.questions.length === 0) { showToast('题库为空，请先导入示例题库','error'); return; }
   var qcount = parseInt(document.getElementById('reg-qcount').value);
   var timelimit = parseInt(document.getElementById('reg-timelimit').value);
@@ -560,10 +980,9 @@ function startExam() {
 }
 
 function setExamStep(step) {
-  document.getElementById('exam-step-register').style.display = step===1?'':'none';
-  document.getElementById('exam-step-answer').style.display = step===2?'':'none';
-  document.getElementById('exam-step-grading').style.display = step===3?'':'none';
-  document.getElementById('exam-step-result').style.display = step===4?'':'none';
+  ['register','answer','grading','result'].forEach(function(s,i){
+    document.getElementById('exam-step-'+s).style.display = (i+1===step)?'':'none';
+  });
   for (var i=1;i<=4;i++) {
     var el = document.getElementById('step'+i);
     el.className = 'step';
@@ -583,17 +1002,19 @@ function updateInfoPanel() {
 function loadQuestion(idx) {
   exam.currentQ = idx;
   var q = exam.questions[idx];
-  document.getElementById('cur-q-num').textContent = idx+1;
-  document.getElementById('total-q-num').textContent = exam.questions.length;
+  var total = exam.questions.length;
+  ['cur-q-num','cur-q-num2'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=idx+1;});
+  document.getElementById('total-q-num').textContent = total;
   document.getElementById('q-text').textContent = q.text;
-  document.getElementById('q-hint').textContent = q.hint ? '💡 提示：'+q.hint : '';
+  var hintEl = document.getElementById('q-hint');
+  if (q.hint) { hintEl.textContent = '💡 提示：'+q.hint; hintEl.style.display=''; }
+  else { hintEl.style.display='none'; }
   document.getElementById('q-difficulty').textContent = q.difficulty||'中等';
   document.getElementById('q-category-tag').innerHTML = '<span class="tag tag-info">'+escH(q.category)+'</span>';
   document.getElementById('answer-text').value = exam.answers[idx]||'';
-  var pct = Math.round((idx+1)/exam.questions.length*100);
+  var pct = Math.round((idx+1)/total*100);
   document.getElementById('exam-progress').style.width = pct+'%';
   renderQuestionNav();
-  renderAnswerProgress();
   if (exam.timeLimit>0) { exam.timeLeft=exam.timeLimit; updateTimerDisplay(); }
   document.getElementById('voice-status').textContent = '';
   document.getElementById('voice-btn').className = 'voice-btn';
@@ -602,25 +1023,13 @@ function loadQuestion(idx) {
 
 function renderQuestionNav() {
   var nav = document.getElementById('q-nav');
+  if (!nav) return;
   nav.innerHTML = exam.questions.map(function(q,i){
     var cls = 'q-nav-btn';
     if (i===exam.currentQ) cls+=' current';
     else if (exam.answers[i]==='【已跳过】') cls+=' skipped';
     else if (exam.answers[i]!==null) cls+=' answered';
     return '<div class="'+cls+'" onclick="loadQuestion('+i+')">'+(i+1)+'</div>';
-  }).join('');
-}
-
-function renderAnswerProgress() {
-  var list = document.getElementById('answer-progress-list');
-  list.innerHTML = exam.questions.map(function(q,i){
-    var ans = exam.answers[i];
-    var status = ans===null?'⬜ 未答':(ans==='【已跳过】'?'⚡ 已跳过':'✅ 已答');
-    var color = ans===null?'#bdc3c7':(ans==='【已跳过】'?'#f39c12':'#27ae60');
-    return '<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">'+
-      '<span style="font-size:10px;width:18px;height:18px;border-radius:50%;background:'+color+';color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(i+1)+'</span>'+
-      '<span style="font-size:11px;color:var(--text-muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+escH(q.text.substring(0,20))+'...</span>'+
-      '<span style="font-size:10px;color:'+color+';">'+status+'</span></div>';
   }).join('');
 }
 
@@ -634,7 +1043,7 @@ function startTimer() {
     else document.getElementById('exam-timer').className='timer-display';
     if (exam.timeLeft<=0) {
       clearInterval(exam.timerInterval);
-      showToast('当前题目时间到，已自动记录','warning');
+      showToast('时间到！已自动记录当前答案','warning');
       var cur = document.getElementById('answer-text').value.trim();
       exam.answers[exam.currentQ] = cur||'【超时未作答】';
       moveToNext();
@@ -666,9 +1075,18 @@ function moveToNext() {
     if (exam.timeLimit>0) startTimer();
   } else {
     var idx=exam.answers.findIndex(function(a){ return a===null; });
-    if (idx!==-1) { loadQuestion(idx); if(exam.timeLimit>0)startTimer(); return; }
+    if (idx!==-1) { showToast('您还有未作答的题目，跳转过去','info'); loadQuestion(idx); if(exam.timeLimit>0)startTimer(); return; }
     submitExam();
   }
+}
+
+function submitExamConfirm() {
+  var unanswered = exam.answers.filter(function(a){ return a===null; }).length;
+  if (unanswered > 0) {
+    if (!confirm('还有 '+unanswered+' 题未作答，确认提交吗？未作答题目将计为0分。')) return;
+    exam.answers = exam.answers.map(function(a){ return a===null?'【未作答】':a; });
+  }
+  submitExam();
 }
 
 function submitExam() {
@@ -683,33 +1101,45 @@ function toggleVoice() { exam.isRecording?stopVoice():startVoice(); }
 
 function startVoice() {
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if (!SR) { showToast('当前浏览器不支持语音识别，请手动输入（建议Chrome）','warning'); return; }
-  exam.recognition=new SR();
-  exam.recognition.lang='zh-CN';
-  exam.recognition.continuous=true;
-  exam.recognition.interimResults=true;
-  var finalText=document.getElementById('answer-text').value;
-  exam.recognition.onresult=function(ev){
-    var interim='';
-    for(var i=ev.resultIndex;i<ev.results.length;i++){
-      if(ev.results[i].isFinal) finalText+=ev.results[i][0].transcript;
-      else interim+=ev.results[i][0].transcript;
-    }
-    document.getElementById('answer-text').value=finalText+interim;
-  };
-  exam.recognition.onerror=function(){ exam.isRecording=false; document.getElementById('voice-btn').className='voice-btn'; document.getElementById('voice-status').textContent='识别出错，请手动输入'; };
-  exam.recognition.onend=function(){ if(exam.isRecording) exam.recognition.start(); };
-  exam.recognition.start();
-  exam.isRecording=true;
-  document.getElementById('voice-btn').className='voice-btn recording';
-  document.getElementById('voice-status').textContent='🔴 录音中，点击停止...';
+  if (!SR) { showToast('当前浏览器不支持语音识别，请手动输入（建议使用Chrome浏览器）','warning'); return; }
+  try {
+    exam.recognition=new SR();
+    exam.recognition.lang='zh-CN';
+    exam.recognition.continuous=true;
+    exam.recognition.interimResults=true;
+    var finalText=document.getElementById('answer-text').value;
+    exam.recognition.onresult=function(ev){
+      var interim='';
+      for(var i=ev.resultIndex;i<ev.results.length;i++){
+        if(ev.results[i].isFinal) finalText+=ev.results[i][0].transcript;
+        else interim+=ev.results[i][0].transcript;
+      }
+      document.getElementById('answer-text').value=finalText+interim;
+    };
+    exam.recognition.onerror=function(e){
+      exam.isRecording=false;
+      document.getElementById('voice-btn').className='voice-btn';
+      var vsEl=document.getElementById('voice-status');
+      vsEl.className='voice-status';
+      vsEl.textContent=e.error==='not-allowed'?'❌ 麦克风权限被拒绝，请在浏览器设置中允许访问麦克风':'识别出错，请手动输入';
+    };
+    exam.recognition.onend=function(){ if(exam.isRecording) exam.recognition.start(); };
+    exam.recognition.start();
+    exam.isRecording=true;
+    document.getElementById('voice-btn').className='voice-btn recording';
+    var vsEl=document.getElementById('voice-status');
+    vsEl.className='voice-status recording';
+    vsEl.textContent='🔴 录音中，再次点击停止...';
+  } catch(e) { showToast('语音识别启动失败：'+e.message,'error'); }
 }
 
 function stopVoice() {
   if (exam.recognition) { exam.recognition.stop(); exam.recognition=null; }
   exam.isRecording=false;
   document.getElementById('voice-btn').className='voice-btn';
-  document.getElementById('voice-status').textContent='✅ 录音结束，已转写';
+  var vsEl=document.getElementById('voice-status');
+  vsEl.className='voice-status done';
+  vsEl.textContent='✅ 录音结束，内容已转写至下方';
 }
 
 // ===================== AI GRADING =====================
@@ -724,12 +1154,11 @@ function simulateGrading() {
     status.textContent=steps[Math.min(i,steps.length-1)];
     if(i>=steps.length){
       clearInterval(interval);
-      setTimeout(function(){ var results=gradeExam(); showResults(results); },400);
+      setTimeout(function(){ var results=gradeExam(); showResults(results); },500);
     }
   },350);
 }
 
-// Semantic grading engine
 var semanticMaps = [
   {patterns:['断电','拉闸','总闸','切断电源','关电','断掉','关掉电','电闸','关闭电源'], canonical:'切断电源'},
   {patterns:['气压','压力表','气压表','指针','绿区','绿色','正常范围','表针'], canonical:'压力表正常'},
@@ -767,20 +1196,17 @@ var semanticMaps = [
 ];
 
 function semanticHit(answerLower, keywords) {
-  // Direct keyword match
   for (var ki=0; ki<keywords.length; ki++) {
     var kw = keywords[ki].trim().toLowerCase();
-    if (kw && answerLower.indexOf(kw.replace(/\s/g,''))!==-1) return {hit:true, evidence:'直接命中"'+kw+'"'};
+    if (kw && answerLower.indexOf(kw)!==-1) return {hit:true, evidence:'直接命中「'+kw+'」'};
   }
-  // Semantic map match
   for (var mi=0; mi<semanticMaps.length; mi++) {
     var map = semanticMaps[mi];
-    // Check if any keyword relates to this map's canonical
     var relevant = keywords.some(function(k){ return map.canonical.toLowerCase().indexOf(k.toLowerCase())!==-1 || map.patterns.some(function(p){ return p.indexOf(k.toLowerCase())!==-1; }); });
     if (!relevant) continue;
     for (var pi=0; pi<map.patterns.length; pi++) {
-      var pat = map.patterns[pi].replace(/\s/g,'');
-      if (answerLower.indexOf(pat)!==-1) return {hit:true, evidence:'"'+map.patterns[pi]+'" → 语义等价"'+map.canonical+'"'};
+      var pat = map.patterns[pi];
+      if (answerLower.indexOf(pat)!==-1) return {hit:true, evidence:'「'+map.patterns[pi]+'」→ 语义等价「'+map.canonical+'」'};
     }
   }
   return {hit:false, evidence:'未提及'};
@@ -789,7 +1215,7 @@ function semanticHit(answerLower, keywords) {
 function gradeExam() {
   return exam.questions.map(function(q, idx){
     var answer = exam.answers[idx]||'';
-    if (answer==='【已跳过】'||answer==='【超时未作答】') {
+    if (answer==='【已跳过】'||answer==='【超时未作答】'||answer==='【未作答】') {
       return { question:q, answer:answer, points:q.points.map(function(p){ return {point:p,hit:false,evidence:'未作答'}; }), score:0 };
     }
     var answerLower = answer.toLowerCase().replace(/[，。？！、\s]/g,'');
@@ -834,11 +1260,14 @@ function showResults(results) {
     }).join('');
     return '<div class="grading-item '+(allHit?'hit':qScore>=60?'':'miss')+'">'+
       '<div class="grading-item-header">'+
-      '<div class="grading-item-title">Q'+(i+1)+'. '+escH(r.question.text.substring(0,35))+'...</div>'+
-      '<span class="tag '+(qScore>=60?'tag-success':'tag-danger')+'">'+qScore+'分 / '+totalPts+'评分点</span></div>'+
-      '<div class="grading-detail" style="margin-bottom:8px;"><strong>📝 作答内容：</strong>'+escH(r.answer.substring(0,100))+(r.answer.length>100?'...':'')+'</div>'+
+      '<div class="grading-item-title">Q'+(i+1)+'. '+escH(r.question.text.length>40?r.question.text.substring(0,40)+'...':r.question.text)+'</div>'+
+      '<span class="tag '+(qScore>=60?'tag-success':'tag-danger')+'">'+qScore+'分 / '+totalPts+'点</span></div>'+
+      '<div class="grading-detail"><strong>📝 作答：</strong>'+escH(r.answer.length>120?r.answer.substring(0,120)+'...':r.answer)+'</div>'+
       pointsHtml+'</div>';
   }).join('');
+
+  // Save result text for copy
+  window._lastResultText = generateResultText(results, scoreRate, passed, hitCount, totalPoints);
 
   // Save to ledger
   store.records.push({
@@ -848,7 +1277,55 @@ function showResults(results) {
     details: results.map(function(r){ return { qText:r.question.text, category:r.question.category||'综合', answer:r.answer, points:r.points, score:Math.round(r.score*100) }; })
   });
   saveStore(); updateHomeStats();
-  showToast('阅卷完成！得分率 '+scoreRate+'%，'+(passed?'考核通过 🎉':'考核未通过，需加强学习'), passed?'success':'error');
+  showToast('阅卷完成！得分率 '+scoreRate+'%，'+(passed?'考核通过 🎉':'请加强学习'), passed?'success':'error');
+}
+
+function generateResultText(results, scoreRate, passed, hitCount, totalPoints) {
+  var lines = [
+    '=== AI消防安全巡检考核结果 ===',
+    '姓名：' + exam.user.name,
+    '工号：' + exam.user.id,
+    '部门：' + exam.user.dept,
+    '岗位：' + exam.user.job,
+    '考核时间：' + exam.user.startTime,
+    '得分率：' + scoreRate + '% | 命中评分点：' + hitCount + '/' + totalPoints,
+    '考核结果：' + (passed ? '✅ 通过' : '❌ 未通过'),
+    '================================'
+  ];
+  results.forEach(function(r, i) {
+    var qScore = Math.round(r.score*100);
+    lines.push('');
+    lines.push('Q'+(i+1)+'. ' + r.question.text);
+    lines.push('得分：' + qScore + '% | 作答：' + r.answer.substring(0,80));
+    r.points.forEach(function(p) {
+      lines.push((p.hit?'[命中]':'[缺失]') + ' ' + p.point.split(';')[0] + ' — ' + p.evidence);
+    });
+  });
+  return lines.join('\n');
+}
+
+function exportResultText() {
+  if (!window._lastResultText) { showToast('暂无结果数据','warning'); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(window._lastResultText).then(function(){
+      showToast('结果文字已复制到剪贴板，可直接粘贴发送给管理员 ✅','success');
+    }).catch(function(){
+      fallbackCopy(window._lastResultText);
+    });
+  } else {
+    fallbackCopy(window._lastResultText);
+  }
+}
+
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position='fixed'; ta.style.top='-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('结果文字已复制！请粘贴发给管理员','success'); }
+  catch(e) { showToast('复制失败，请手动截图','warning'); }
+  document.body.removeChild(ta);
 }
 
 function retakeExam() { setExamStep(1); document.getElementById('exam-step-register').style.display=''; }
@@ -866,12 +1343,12 @@ function renderQBank() {
   tbody.innerHTML = qs.map(function(q,i){
     var pts = q.points.map(function(p){ return '<span class="tag tag-gray" style="margin:2px;font-size:10px;">'+escH(p.split(';')[0])+'</span>'; }).join('');
     return '<tr>'+
-      '<td style="color:var(--text-muted)">'+(i+1)+'</td>'+
+      '<td style="color:var(--text-muted);">'+(i+1)+'</td>'+
       '<td><span class="tag tag-info">'+escH(q.category)+'</span></td>'+
-      '<td style="max-width:280px;line-height:1.5;">'+escH(q.text)+'</td>'+
-      '<td style="max-width:200px;">'+pts+'</td>'+
+      '<td style="max-width:260px;line-height:1.5;">'+escH(q.text)+'</td>'+
+      '<td style="max-width:180px;">'+pts+'</td>'+
       '<td><span class="tag '+(diffColors[q.difficulty]||'tag-gray')+'">'+escH(q.difficulty)+'</span></td>'+
-      '<td>'+
+      '<td style="white-space:nowrap;">'+
         '<button class="btn btn-secondary btn-sm" onclick="editQuestion(\''+q.id+'\')">编辑</button> '+
         '<button class="btn btn-danger btn-sm" onclick="deleteQuestion(\''+q.id+'\')">删除</button>'+
       '</td></tr>';
@@ -943,13 +1420,13 @@ function importSampleQuestions() {
      hint:'国企内部有规范的报告流程',answer:'①向消防控制中心报告着火位置和火情；②拨打119说明具体地址；③组织人员疏散。'},
     {id:'q_s4',text:'火灾逃生时，如何正确通过充满烟雾的走廊？',category:'疏散逃生',difficulty:'中等',
      points:['低姿;弯腰;匍匐;爬行;俯身;蹲下','捂住口鼻;湿毛巾;湿布;防烟;掩住口','安全出口;疏散门;疏散通道;逃生通道;出口'],
-     hint:'烟雾有毒且集中在高处',answer:'①用湿毛巾捂住口鼻；②低姿或匍匐前进（烟雾在高处）；③沿疏散通道向安全出口撤离；④不乘电梯。'},
+     hint:'烟雾有毒且集中在高处',answer:'①用湿毛巾捂住口鼻；②低姿或匍匐前进；③沿疏散通道向安全出口撤离；④不乘电梯。'},
     {id:'q_s5',text:'请描述消防巡检人员日常巡检的主要工作内容',category:'日常巡检',difficulty:'中等',
      points:['灭火器;灭火设备;消防器材','疏散通道;安全出口;通道畅通;出口标识','消火栓;水带;水枪','应急灯;应急照明;疏散标识'],
      hint:'从消防设备、疏散通道、标识等方面回答',answer:'①检查灭火器在位、压力正常；②疏散通道畅通；③消火栓水带水枪完好；④应急照明和疏散标识正常。'},
     {id:'q_s6',text:'二氧化碳灭火器适用于哪些火灾场景，有何使用注意事项？',category:'灭火器',difficulty:'困难',
-     points:['电气;电器;电路;电子设备;精密仪器','不导电;绝缘;安全;避免触电','近距离;不要离太近;保持距离','室外;风大;效果差;室内'],
-     hint:'特别注意适用和不适用场景',answer:'适用：电气火灾、精密仪器（不导电无残留）。注意：①不用于深层火灾；②室外风大效果差；③不直接接触金属喇叭（防冻伤）。'},
+     points:['电气;电器;电路;电子设备;精密仪器','不导电;绝缘;安全;避免触电','距离;靠近','室外;风大;效果差'],
+     hint:'特别注意适用和不适用场景',answer:'适用：电气火灾、精密仪器。注意：①室外风大效果差；②不直接接触金属喇叭（防冻伤）。'},
     {id:'q_s7',text:'请说明手提式干粉灭火器的正确使用步骤',category:'灭火器',difficulty:'中等',
      points:['拔销;拔掉保险销;拔出销子','距离;靠近;站在火源侧方;适当距离','压把;按下;握住把手;压下','扫射;从根部;对准火焰根部;从外向内'],
      hint:'记住口诀：拔、握、压、扫',answer:'①拔——拔出保险销；②握——一手握喷管；③压——压下压把；④扫——对准火焰根部左右扫射。'},
@@ -967,7 +1444,7 @@ function importSampleQuestions() {
   var added=0;
   samples.forEach(function(s){ if(existing.indexOf(s.id)===-1){ store.questions.push(s); added++; } });
   saveStore(); renderQBank(); updateHomeStats();
-  showToast('已导入 '+added+' 道示例题目','success');
+  showToast(added>0?'已导入 '+added+' 道示例题目':'示例题库已全部导入','success');
 }
 
 // ===================== LEDGER =====================
@@ -982,17 +1459,17 @@ function renderLedger() {
   var tbody=document.getElementById('ledger-tbody');
   if (records.length===0) { tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-muted);">暂无考核记录</td></tr>'; document.getElementById('ledger-count').textContent='共 0 条记录'; return; }
   tbody.innerHTML=records.map(function(r,i){
-    var scoreColor=r.scoreRate>=80?'var(--success)':r.scoreRate>=60?'var(--info)':'var(--primary)';
+    var scoreColor=r.scoreRate>=80?'var(--success)':r.scoreRate>=60?'var(--info)':'var(--danger)';
     var barClass=r.scoreRate>=80?'green':r.scoreRate>=60?'blue':'red';
     return '<tr>'+
-      '<td style="color:var(--text-muted)">'+(i+1)+'</td>'+
+      '<td style="color:var(--text-muted);">'+(i+1)+'</td>'+
       '<td><strong>'+escH(r.name)+'</strong></td>'+
-      '<td style="color:var(--text-muted)">'+escH(r.empId)+'</td>'+
+      '<td style="color:var(--text-muted);">'+escH(r.empId)+'</td>'+
       '<td>'+escH(r.dept)+'</td>'+
       '<td>'+escH(r.job)+'</td>'+
-      '<td style="font-size:12px;color:var(--text-muted)">'+escH(r.time)+'</td>'+
+      '<td style="font-size:12px;color:var(--text-muted);white-space:nowrap;">'+escH(r.time)+'</td>'+
       '<td>'+r.questionCount+'题</td>'+
-      '<td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-bar-wrap" style="width:60px;"><div class="progress-bar '+barClass+'" style="width:'+r.scoreRate+'%"></div></div><span style="font-size:13px;font-weight:700;color:'+scoreColor+';">'+r.scoreRate+'%</span></div></td>'+
+      '<td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar-wrap" style="width:50px;"><div class="progress-bar '+barClass+'" style="width:'+r.scoreRate+'%"></div></div><span style="font-size:13px;font-weight:700;color:'+scoreColor+';">'+r.scoreRate+'%</span></div></td>'+
       '<td><span class="tag '+(r.passed?'tag-success':'tag-danger')+'">'+(r.passed?'通过':'未通过')+'</span></td>'+
       '<td><button class="btn btn-info btn-sm" onclick="showLedgerDetail('+r.id+')">详情</button></td>'+
       '</tr>';
@@ -1003,7 +1480,6 @@ function renderLedger() {
 function showLedgerDetail(id) {
   var r=store.records.find(function(r){ return r.id==id; });
   if (!r) return;
-  var scoreColor=r.scoreRate>=60?'var(--success)':'var(--primary)';
   var content=document.getElementById('ledger-detail-content');
   var detailHtml=r.details.map(function(d,i){
     var ptsHtml=d.points.map(function(p){
@@ -1012,17 +1488,17 @@ function showLedgerDetail(id) {
     return '<div class="grading-item '+(d.score>=60?'hit':'miss')+'" style="margin-bottom:10px;">'+
       '<div class="grading-item-header"><div class="grading-item-title" style="font-size:13px;">Q'+(i+1)+'. '+escH(d.qText.substring(0,40))+'</div>'+
       '<span class="tag '+(d.score>=60?'tag-success':'tag-danger')+'">'+d.score+'分</span></div>'+
-      '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">作答：'+escH(d.answer.substring(0,80))+'</div>'+
+      '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;background:var(--bg);padding:6px 8px;border-radius:6px;">作答：'+escH(d.answer.substring(0,80))+'</div>'+
       ptsHtml+'</div>';
   }).join('');
   content.innerHTML=
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;font-size:13px;">'+
-    '<div><span style="color:var(--text-muted)">姓名：</span><strong>'+escH(r.name)+'</strong></div>'+
-    '<div><span style="color:var(--text-muted)">工号：</span><strong>'+escH(r.empId)+'</strong></div>'+
-    '<div><span style="color:var(--text-muted)">部门：</span><strong>'+escH(r.dept)+'</strong></div>'+
-    '<div><span style="color:var(--text-muted)">岗位：</span><strong>'+escH(r.job)+'</strong></div>'+
-    '<div><span style="color:var(--text-muted)">时间：</span><strong>'+escH(r.time)+'</strong></div>'+
-    '<div><span style="color:var(--text-muted)">结果：</span><span class="tag '+(r.passed?'tag-success':'tag-danger')+'">'+r.scoreRate+'% '+(r.passed?'通过':'未通过')+'</span></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;font-size:13px;">'+
+    '<div><span style="color:var(--text-muted);">姓名：</span><strong>'+escH(r.name)+'</strong></div>'+
+    '<div><span style="color:var(--text-muted);">工号：</span><strong>'+escH(r.empId)+'</strong></div>'+
+    '<div><span style="color:var(--text-muted);">部门：</span><strong>'+escH(r.dept)+'</strong></div>'+
+    '<div><span style="color:var(--text-muted);">岗位：</span><strong>'+escH(r.job)+'</strong></div>'+
+    '<div><span style="color:var(--text-muted);">时间：</span><strong>'+escH(r.time)+'</strong></div>'+
+    '<div><span style="color:var(--text-muted);">结果：</span><span class="tag '+(r.passed?'tag-success':'tag-danger')+'">'+r.scoreRate+'% '+(r.passed?'通过':'未通过')+'</span></div>'+
     '</div><hr class="divider">'+detailHtml;
   document.getElementById('modal-ledger-detail').classList.add('show');
 }
@@ -1032,7 +1508,7 @@ function exportLedger() {
   var rows=[['姓名','工号','部门','岗位','考核时间','题数','得分率','结果']];
   store.records.forEach(function(r){ rows.push([r.name,r.empId,r.dept,r.job,r.time,r.questionCount,r.scoreRate+'%',r.passed?'通过':'未通过']); });
   downloadCSV(rows,'消防考核台账_'+new Date().toLocaleDateString('zh-CN'));
-  showToast('台账已导出','success');
+  showToast('台账已导出 CSV','success');
 }
 
 function clearLedger() {
@@ -1070,14 +1546,15 @@ function renderAnalysis() {
       });
     });
   });
-  var sorted=Object.entries(pointMiss).filter(function(e){ return e[1].total>=1; })
+  var sorted=Object.keys(pointMiss).map(function(k){ return [k,pointMiss[k]]; })
+    .filter(function(e){ return e[1].total>=1; })
     .sort(function(a,b){ return (b[1].miss/b[1].total)-(a[1].miss/a[1].total); }).slice(0,8);
   if (sorted.length>0) {
     document.getElementById('an-weak').textContent=sorted[0][0];
     document.getElementById('weak-chart').innerHTML=sorted.map(function(e){
       var name=e[0]; var val=e[1];
       var missRate=Math.round(val.miss/val.total*100);
-      var color=missRate>=60?'var(--primary)':missRate>=30?'var(--warning)':'var(--success)';
+      var color=missRate>=60?'var(--danger)':missRate>=30?'var(--warning)':'var(--success)';
       return '<div class="chart-bar-row">'+
         '<div class="chart-bar-label">'+escH(name)+'</div>'+
         '<div class="chart-bar-wrap"><div class="chart-bar" style="width:'+missRate+'%;background:'+color+';">'+missRate+'%</div></div>'+
@@ -1096,29 +1573,29 @@ function renderAnalysis() {
     });
   });
   var colors=['var(--primary)','var(--info)','var(--success)','var(--warning)','#9b59b6'];
-  var catHtml=Object.entries(catData).map(function(e,i){
-    var rate=Math.round(e[1].pass/e[1].total*100);
+  var catKeys=Object.keys(catData);
+  document.getElementById('category-chart').innerHTML=catKeys.length?catKeys.map(function(k,i){
+    var rate=Math.round(catData[k].pass/catData[k].total*100);
     var color=colors[i%colors.length];
     return '<div class="chart-bar-row">'+
-      '<div class="chart-bar-label">'+escH(e[0])+'</div>'+
+      '<div class="chart-bar-label">'+escH(k)+'</div>'+
       '<div class="chart-bar-wrap"><div class="chart-bar" style="width:'+rate+'%;background:'+color+';">'+rate+'%</div></div>'+
       '<div class="chart-bar-value" style="color:'+color+';">'+rate+'%</div></div>';
-  }).join('');
-  document.getElementById('category-chart').innerHTML=catHtml||'<div class="empty-state"><div class="empty-icon">📭</div><p>暂无分类数据</p></div>';
+  }).join(''):'<div class="empty-state"><div class="empty-icon">📭</div><p>暂无分类数据</p></div>';
 
   // Score trend
   var recent=records.slice().sort(function(a,b){ return b.id-a.id; }).slice(0,10).reverse();
   var trendHtml=recent.map(function(r){
-    var h=Math.max(4,Math.round(r.scoreRate/100*120));
-    var color=r.scoreRate>=60?'var(--success)':'var(--primary)';
-    return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">'+
-      '<div style="font-size:11px;font-weight:700;color:'+color+';">'+r.scoreRate+'%</div>'+
-      '<div style="width:100%;max-width:40px;height:'+h+'px;background:'+color+';border-radius:4px 4px 0 0;min-height:4px;"></div>'+
-      '<div style="font-size:10px;color:var(--text-muted);text-align:center;max-width:40px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+escH(r.name)+'</div></div>';
+    var h=Math.max(6,Math.round(r.scoreRate/100*110));
+    var color=r.scoreRate>=60?'var(--success)':'var(--danger)';
+    return '<div class="trend-bar-col">'+
+      '<div class="trend-bar-val" style="color:'+color+';">'+r.scoreRate+'%</div>'+
+      '<div class="trend-bar-rect" style="height:'+h+'px;background:'+color+';"></div>'+
+      '<div class="trend-bar-name">'+escH(r.name)+'</div></div>';
   }).join('');
   document.getElementById('score-trend').innerHTML=
-    '<div style="display:flex;align-items:flex-end;gap:6px;height:152px;padding-top:16px;border-bottom:2px solid var(--border);">'+trendHtml+'</div>'+
-    '<div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:center;">← 时间顺序（最近10次） →</div>';
+    '<div class="trend-chart">'+trendHtml+'</div>'+
+    '<div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:center;">← 时间顺序（最近10次）→</div>';
 
   // Dept analysis
   var deptData={};
@@ -1128,20 +1605,20 @@ function renderAnalysis() {
     if (r.passed) deptData[r.dept].pass++;
     deptData[r.dept].scoreSum+=r.scoreRate;
   });
-  var deptHtml=Object.entries(deptData).sort(function(a,b){ return b[1].total-a[1].total; }).map(function(e){
-    var dept=e[0]; var d=e[1];
+  var deptKeys=Object.keys(deptData).sort(function(a,b){ return deptData[b].total-deptData[a].total; });
+  document.getElementById('dept-tbody').innerHTML=deptKeys.length?deptKeys.map(function(dept){
+    var d=deptData[dept];
     var rate=Math.round(d.pass/d.total*100);
     var avg=Math.round(d.scoreSum/d.total);
-    var rateColor=rate>=80?'var(--success)':rate>=60?'var(--info)':'var(--primary)';
+    var rateColor=rate>=80?'var(--success)':rate>=60?'var(--info)':'var(--danger)';
     var barClass=rate>=80?'green':rate>=60?'blue':'red';
     return '<tr>'+
       '<td><strong>'+escH(dept)+'</strong></td>'+
       '<td>'+d.total+'</td>'+
       '<td>'+d.pass+'</td>'+
-      '<td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-bar-wrap" style="width:80px;"><div class="progress-bar '+barClass+'" style="width:'+rate+'%"></div></div><span style="font-size:13px;font-weight:700;color:'+rateColor+';">'+rate+'%</span></div></td>'+
+      '<td><div style="display:flex;align-items:center;gap:8px;"><div class="progress-bar-wrap" style="width:70px;"><div class="progress-bar '+barClass+'" style="width:'+rate+'%"></div></div><span style="font-size:13px;font-weight:700;color:'+rateColor+';">'+rate+'%</span></div></td>'+
       '<td style="font-weight:700;color:'+rateColor+';">'+avg+'%</td></tr>';
-  }).join('');
-  document.getElementById('dept-tbody').innerHTML=deptHtml||'<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">暂无数据</td></tr>';
+  }).join(''):'<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">暂无数据</td></tr>';
 }
 
 // ===================== UTILS =====================
@@ -1160,7 +1637,7 @@ function showToast(msg, type) {
   var icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};
   toast.innerHTML='<span>'+(icons[type]||'ℹ️')+'</span><span>'+escH(msg)+'</span>';
   container.appendChild(toast);
-  setTimeout(function(){ toast.style.opacity='0'; toast.style.transform='translateX(30px)'; toast.style.transition='all 0.3s'; setTimeout(function(){ toast.remove(); },300); },3000);
+  setTimeout(function(){ toast.style.opacity='0'; toast.style.transform='translateX(30px)'; toast.style.transition='all 0.3s'; setTimeout(function(){ if(toast.parentNode)toast.remove(); },300); },3500);
 }
 
 function downloadCSV(rows, filename) {
@@ -1170,7 +1647,7 @@ function downloadCSV(rows, filename) {
   var a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download=filename+'.csv';
-  a.click();
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
 }
 
